@@ -6,8 +6,8 @@ import android.content.res.XmlResourceParser;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.Pair;
-import com.android.internal.util.XmlUtils;
 
+import com.commonsware.cwac.netseccfg.internalutil.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -138,7 +139,7 @@ public class XmlConfigSource implements ConfigSource {
     }
 
     int outerDepth = parser.getDepth();
-    Set<Pin> pins = new ArraySet<>();
+    Set<Pin> pins = new HashSet<>();
     while (XmlUtils.nextElementWithin(parser, outerDepth)) {
       String tagName = parser.getName();
       if (tagName.equals("pin")) {
@@ -219,7 +220,7 @@ public class XmlConfigSource implements ConfigSource {
     List<Pair<NetworkSecurityConfig.Builder, Set<Domain>>> builders = new ArrayList<>();
     NetworkSecurityConfig.Builder builder = new NetworkSecurityConfig.Builder();
     builder.setParent(parentBuilder);
-    Set<Domain> domains = new ArraySet<>();
+    Set<Domain> domains = new HashSet<>();
     boolean seenPinSet = false;
     boolean seenTrustAnchors = false;
     boolean defaultOverridePins = configType == CONFIG_DEBUG;
@@ -302,7 +303,7 @@ public class XmlConfigSource implements ConfigSource {
 
   private void parseNetworkSecurityConfig(XmlResourceParser parser)
     throws IOException, XmlPullParserException, ParserException {
-    Set<String> seenDomains = new ArraySet<>();
+    Set<String> seenDomains = new HashSet<>();
     List<Pair<NetworkSecurityConfig.Builder, Set<Domain>>> builders = new ArrayList<>();
     NetworkSecurityConfig.Builder baseConfigBuilder = null;
     NetworkSecurityConfig.Builder debugConfigBuilder = null;
@@ -350,7 +351,7 @@ public class XmlConfigSource implements ConfigSource {
       baseConfigBuilder = platformDefaultBuilder;
     }
     // Build the per-domain config mapping.
-    Set<Pair<Domain, NetworkSecurityConfig>> configs = new ArraySet<>();
+    Set<Pair<Domain, NetworkSecurityConfig>> configs = new HashSet<>();
 
     for (Pair<NetworkSecurityConfig.Builder, Set<Domain>> entry : builders) {
       NetworkSecurityConfig.Builder builder = entry.first;

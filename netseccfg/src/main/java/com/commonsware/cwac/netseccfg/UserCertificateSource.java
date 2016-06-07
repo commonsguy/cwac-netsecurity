@@ -16,8 +16,8 @@
 
 package com.commonsware.cwac.netseccfg;
 
-import android.os.Environment;
-import android.os.UserHandle;
+import com.commonsware.cwac.netseccfg.os.EnvironmentEx;
+import com.commonsware.cwac.netseccfg.os.UserHandleEx;
 import java.io.File;
 
 /**
@@ -29,7 +29,7 @@ public final class UserCertificateSource extends DirectoryCertificateSource {
 
   private UserCertificateSource() {
     super(new File(
-      Environment.getUserConfigDirectory(UserHandle.myUserId()), "cacerts-added"));
+      EnvironmentEx.getUserConfigDirectory(UserHandleEx.myUserId()), "cacerts-added"));
   }
 
   public static UserCertificateSource getInstance() {

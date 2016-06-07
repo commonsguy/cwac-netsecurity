@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 The Android Open Source Project
+ * Portions Copyright (C) 2016 CommonsWare, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +17,8 @@
 
 package com.commonsware.cwac.netseccfg;
 
-import android.os.Environment;
-import android.os.UserHandle;
+import com.commonsware.cwac.netseccfg.os.EnvironmentEx;
+import com.commonsware.cwac.netseccfg.os.UserHandleEx;
 import java.io.File;
 
 /**
@@ -30,7 +31,8 @@ public final class SystemCertificateSource extends DirectoryCertificateSource {
 
   private SystemCertificateSource() {
     super(new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts"));
-    File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
+    File configDir = EnvironmentEx.getUserConfigDirectory(
+      UserHandleEx.myUserId());
     mUserRemovedCaDir = new File(configDir, "cacerts-removed");
   }
 

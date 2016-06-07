@@ -16,16 +16,17 @@
 
 package com.commonsware.cwac.netseccfg;
 
+  import com.commonsware.cwac.netseccfg.conscrypt.TrustedCertificateStore;
   import java.io.File;
   import java.security.cert.Certificate;
   import java.security.cert.X509Certificate;
   import java.util.Date;
   import java.util.Set;
 
-  import com.android.org.conscrypt.TrustedCertificateStore;
 
 /** @hide */
-public class TrustedCertificateStoreAdapter extends TrustedCertificateStore {
+public class TrustedCertificateStoreAdapter extends
+  TrustedCertificateStore {
   private final NetworkSecurityConfig mConfig;
 
   public TrustedCertificateStoreAdapter(NetworkSecurityConfig config) {

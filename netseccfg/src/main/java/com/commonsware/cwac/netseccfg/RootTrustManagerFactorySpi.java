@@ -30,7 +30,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.TrustManagerFactorySpi;
 
-import com.android.internal.annotations.VisibleForTesting;
+// import com.android.internal.annotations.VisibleForTesting;
 
 /** @hide */
 public class RootTrustManagerFactorySpi extends TrustManagerFactorySpi {
@@ -65,7 +65,7 @@ public class RootTrustManagerFactorySpi extends TrustManagerFactorySpi {
     return new TrustManager[] { mApplicationConfig.getTrustManager() };
   }
 
-  @VisibleForTesting
+//  @VisibleForTesting
   public static final class ApplicationConfigParameters implements ManagerFactoryParameters {
     public final ApplicationConfig config;
     public ApplicationConfigParameters(ApplicationConfig config) {

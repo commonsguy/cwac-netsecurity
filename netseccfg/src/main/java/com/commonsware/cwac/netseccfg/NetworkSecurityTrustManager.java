@@ -16,9 +16,8 @@
 
 package com.commonsware.cwac.netseccfg;
 
-import com.android.org.conscrypt.TrustManagerImpl;
-
 import android.util.ArrayMap;
+import com.commonsware.cwac.netseccfg.conscrypt.TrustManagerImpl;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

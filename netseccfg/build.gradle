@@ -9,7 +9,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 23
         testApplicationId "com.commonsware.cwac.netseccfg.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
