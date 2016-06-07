@@ -1,0 +1,45 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    androidTestCompile 'com.android.support.test:rules:0.5'
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 23
+        testApplicationId "com.commonsware.cwac.netseccfg.test"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}
+
+// from http://stackoverflow.com/a/19484146/115145
+
+android.libraryVariants.all { variant ->
+  def name = variant.buildType.name
+  if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+    return; // Skip debug builds.
+  }
+  def task = project.tasks.create "jar${name.capitalize()}", Jar
+  task.dependsOn variant.javaCompile
+  task.from variant.javaCompile.destinationDir
+  task.baseName = "cwac-${PUBLISH_ARTIFACT_ID}"
+  task.version = PUBLISH_VERSION
+  task.exclude('com/commonsware/cwac/**/BuildConfig.**')
+}
+
+apply plugin: 'maven'
+ 
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.groupId = PUBLISH_GROUP_ID
+        pom.artifactId = PUBLISH_ARTIFACT_ID
+        pom.version = PUBLISH_VERSION
+
+        repository(url: LOCAL_REPO)
+    }
+}
+
