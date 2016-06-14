@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +90,7 @@ public final class NetworkSecurityConfig {
           }
         }
       }
-      ArraySet<TrustAnchor> anchors = new ArraySet<TrustAnchor>(anchorMap.size());
+      HashSet<TrustAnchor> anchors = new HashSet<TrustAnchor>(anchorMap.size());
       anchors.addAll(anchorMap.values());
       mAnchors = anchors;
       return mAnchors;
@@ -147,7 +148,7 @@ public final class NetworkSecurityConfig {
 
   /** @hide */
   public Set<X509Certificate> findAllCertificatesByIssuerAndSignature(X509Certificate cert) {
-    Set<X509Certificate> certs = new ArraySet<X509Certificate>();
+    Set<X509Certificate> certs = new HashSet<X509Certificate>();
     for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
       certs.addAll(ref.findAllCertificatesByIssuerAndSignature(cert));
     }
@@ -171,13 +172,15 @@ public final class NetworkSecurityConfig {
   public static final Builder getDefaultBuilder() {
     return new Builder()
       .setCleartextTrafficPermitted(DEFAULT_CLEARTEXT_TRAFFIC_PERMITTED)
-      .setHstsEnforced(DEFAULT_HSTS_ENFORCED)
+      .setHstsEnforced(DEFAULT_HSTS_ENFORCED);
       // System certificate store, does not bypass static pins.
+/*
       .addCertificatesEntryRef(
         new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
       // User certificate store, does not bypass static pins.
       .addCertificatesEntryRef(
         new CertificatesEntryRef(UserCertificateSource.getInstance(), false));
+*/
   }
 
   /**

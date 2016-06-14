@@ -18,6 +18,7 @@ package com.commonsware.cwac.netseccfg;
 
 import android.util.ArraySet;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /** @hide */
@@ -37,7 +38,7 @@ public final class PinSet {
 
   Set<String> getPinAlgorithms() {
     // TODO: Cache this.
-    Set<String> algorithms = new ArraySet<String>();
+    Set<String> algorithms = new HashSet<>();
     for (Pin pin : pins) {
       algorithms.add(pin.digestAlgorithm);
     }

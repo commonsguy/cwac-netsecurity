@@ -18,6 +18,7 @@ package com.commonsware.cwac.netseccfg;
 
 import android.util.ArraySet;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.Set;
 
 /** @hide */
@@ -36,7 +37,7 @@ public final class CertificatesEntryRef {
 
   public Set<TrustAnchor> getTrustAnchors() {
     // TODO: cache this [but handle mutable sources]
-    Set<TrustAnchor> anchors = new ArraySet<TrustAnchor>();
+    Set<TrustAnchor> anchors = new HashSet<>();
     for (X509Certificate cert : mSource.getCertificates()) {
       anchors.add(new TrustAnchor(cert, mOverridesPins));
     }

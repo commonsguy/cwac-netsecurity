@@ -33,6 +33,7 @@ public class TrustedCertificateStoreAdapter extends
     mConfig = config;
   }
 
+/*
   @Override
   public X509Certificate findIssuer(X509Certificate cert) {
     TrustAnchor anchor = mConfig.findTrustAnchorByIssuerAndSignature(cert);
@@ -41,6 +42,7 @@ public class TrustedCertificateStoreAdapter extends
     }
     return anchor.certificate;
   }
+*/
 
   @Override
   public Set<X509Certificate> findAllIssuers(X509Certificate cert) {
@@ -55,6 +57,7 @@ public class TrustedCertificateStoreAdapter extends
     }
     return anchor.certificate;
   }
+/*
 
   @Override
   public boolean isUserAddedCertificate(X509Certificate cert) {
@@ -71,14 +74,17 @@ public class TrustedCertificateStoreAdapter extends
     // getCertificateFile is only used for tests, do not support it here.
     throw new UnsupportedOperationException();
   }
+*/
 
   // The methods below are exposed in TrustedCertificateStore but not used by conscrypt, do not
   // support them.
 
+/*
   @Override
   public Certificate getCertificate(String alias) {
     throw new UnsupportedOperationException();
   }
+
 
   @Override
   public Certificate getCertificate(String alias, boolean includeDeletedSystem) {
@@ -119,4 +125,5 @@ public class TrustedCertificateStoreAdapter extends
   public String getCertificateAlias(Certificate c, boolean includeDeletedSystem) {
     throw new UnsupportedOperationException();
   }
+*/
 }

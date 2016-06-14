@@ -18,7 +18,7 @@ package com.commonsware.cwac.netseccfg;
 
 import android.content.Context;
 import android.util.ArraySet;
-import libcore.io.IoUtils;
+import com.commonsware.cwac.netseccfg.conscrypt.TrustedCertificateIndex;
 import java.io.InputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -26,9 +26,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-
-import com.android.org.conscrypt.TrustedCertificateIndex;
 
 /**
  * {@link CertificateSource} based on certificates contained in an application resource file.
@@ -52,7 +51,7 @@ public class ResourceCertificateSource implements CertificateSource {
       if (mCertificates != null) {
         return;
       }
-      Set<X509Certificate> certificates = new ArraySet<X509Certificate>();
+      Set<X509Certificate> certificates = new HashSet<>();
       Collection<? extends Certificate> certs;
       InputStream in = null;
       try {
@@ -63,7 +62,12 @@ public class ResourceCertificateSource implements CertificateSource {
         throw new RuntimeException("Failed to load trust anchors from id " + mResourceId,
           e);
       } finally {
-        IoUtils.closeQuietly(in);
+        try {
+          in.close();
+        } catch (RuntimeException rethrown) {
+          throw rethrown;
+        } catch (Exception ignored) {
+        }
       }
       TrustedCertificateIndex indexLocal = new TrustedCertificateIndex();
       for (Certificate cert : certs) {
@@ -109,7 +113,7 @@ public class ResourceCertificateSource implements CertificateSource {
     if (anchors.isEmpty()) {
       return Collections.<X509Certificate>emptySet();
     }
-    Set<X509Certificate> certs = new ArraySet<X509Certificate>(anchors.size());
+    Set<X509Certificate> certs = new HashSet<>(anchors.size());
     for (java.security.cert.TrustAnchor anchor : anchors) {
       certs.add(anchor.getTrustedCert());
     }

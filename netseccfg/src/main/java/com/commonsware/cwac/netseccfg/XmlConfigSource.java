@@ -185,10 +185,12 @@ public class XmlConfigSource implements ConfigSource {
     if (sourceId != -1) {
       // TODO: Cache ResourceCertificateSources by sourceId
       source = new ResourceCertificateSource(sourceId, mContext);
+/*
     } else if ("system".equals(sourceString)) {
       source = SystemCertificateSource.getInstance();
     } else if ("user".equals(sourceString)) {
       source = UserCertificateSource.getInstance();
+*/
     } else {
       throw new ParserException(parser, "Unknown certificates src. "
         + "Should be one of system|user|@resourceVal");

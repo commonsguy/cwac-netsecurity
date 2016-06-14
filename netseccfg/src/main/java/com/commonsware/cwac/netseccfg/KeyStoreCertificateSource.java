@@ -17,15 +17,17 @@
 package com.commonsware.cwac.netseccfg;
 
 import android.util.ArraySet;
+import com.commonsware.cwac.netseccfg.conscrypt.TrustedCertificateIndex;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Set;
 
-import com.android.org.conscrypt.TrustedCertificateIndex;
+
 
 /**
  * {@link CertificateSource} which provides certificates from trusted certificate entries of a
@@ -55,7 +57,7 @@ class KeyStoreCertificateSource implements CertificateSource {
 
       try {
         TrustedCertificateIndex localIndex = new TrustedCertificateIndex();
-        Set<X509Certificate> certificates = new ArraySet<>(mKeyStore.size());
+        Set<X509Certificate> certificates = new HashSet<>(mKeyStore.size());
         for (Enumeration<String> en = mKeyStore.aliases(); en.hasMoreElements();) {
           String alias = en.nextElement();
           X509Certificate cert = (X509Certificate) mKeyStore.getCertificate(alias);
@@ -99,7 +101,7 @@ class KeyStoreCertificateSource implements CertificateSource {
     if (anchors.isEmpty()) {
       return Collections.<X509Certificate>emptySet();
     }
-    Set<X509Certificate> certs = new ArraySet<X509Certificate>(anchors.size());
+    Set<X509Certificate> certs = new HashSet<X509Certificate>(anchors.size());
     for (java.security.cert.TrustAnchor anchor : anchors) {
       certs.add(anchor.getTrustedCert());
     }
