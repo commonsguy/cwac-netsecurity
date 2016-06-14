@@ -14,39 +14,35 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
-import android.util.ArraySet;
+import android.content.Context;
 import com.commonsware.cwac.netseccfg.conscrypt.TrustedCertificateIndex;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
+import java.io.InputStream;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-
-
 /**
- * {@link CertificateSource} which provides certificates from trusted certificate entries of a
- * {@link KeyStore}.
+ * {@link CertificateSource} based on certificates contained in an application resource file.
+ * @hide
  */
-class KeyStoreCertificateSource implements CertificateSource {
+public class ResourceCertificateSource implements CertificateSource {
   private final Object mLock = new Object();
-  private final KeyStore mKeyStore;
-  private TrustedCertificateIndex mIndex;
+  private final int  mResourceId;
+
   private Set<X509Certificate> mCertificates;
+  private Context mContext;
+  private TrustedCertificateIndex mIndex;
 
-  public KeyStoreCertificateSource(KeyStore ks) {
-    mKeyStore = ks;
-  }
-
-  @Override
-  public Set<X509Certificate> getCertificates() {
-    ensureInitialized();
-    return mCertificates;
+  public ResourceCertificateSource(int resourceId, Context context) {
+    mResourceId = resourceId;
+    mContext = context.getApplicationContext();
   }
 
   private void ensureInitialized() {
@@ -54,24 +50,39 @@ class KeyStoreCertificateSource implements CertificateSource {
       if (mCertificates != null) {
         return;
       }
-
+      Set<X509Certificate> certificates = new HashSet<>();
+      Collection<? extends Certificate> certs;
+      InputStream in = null;
       try {
-        TrustedCertificateIndex localIndex = new TrustedCertificateIndex();
-        Set<X509Certificate> certificates = new HashSet<>(mKeyStore.size());
-        for (Enumeration<String> en = mKeyStore.aliases(); en.hasMoreElements();) {
-          String alias = en.nextElement();
-          X509Certificate cert = (X509Certificate) mKeyStore.getCertificate(alias);
-          if (cert != null) {
-            certificates.add(cert);
-            localIndex.index(cert);
-          }
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        in = mContext.getResources().openRawResource(mResourceId);
+        certs = factory.generateCertificates(in);
+      } catch (CertificateException e) {
+        throw new RuntimeException("Failed to load trust anchors from id " + mResourceId,
+          e);
+      } finally {
+        try {
+          in.close();
+        } catch (RuntimeException rethrown) {
+          throw rethrown;
+        } catch (Exception ignored) {
         }
-        mIndex = localIndex;
-        mCertificates = certificates;
-      } catch (KeyStoreException e) {
-        throw new RuntimeException("Failed to load certificates from KeyStore", e);
       }
+      TrustedCertificateIndex indexLocal = new TrustedCertificateIndex();
+      for (Certificate cert : certs) {
+        certificates.add((X509Certificate) cert);
+        indexLocal.index((X509Certificate) cert);
+      }
+      mCertificates = certificates;
+      mIndex = indexLocal;
+      mContext = null;
     }
+  }
+
+  @Override
+  public Set<X509Certificate> getCertificates() {
+    ensureInitialized();
+    return mCertificates;
   }
 
   @Override
@@ -101,7 +112,7 @@ class KeyStoreCertificateSource implements CertificateSource {
     if (anchors.isEmpty()) {
       return Collections.<X509Certificate>emptySet();
     }
-    Set<X509Certificate> certs = new HashSet<X509Certificate>(anchors.size());
+    Set<X509Certificate> certs = new HashSet<>(anchors.size());
     for (java.security.cert.TrustAnchor anchor : anchors) {
       certs.add(anchor.getTrustedCert());
     }

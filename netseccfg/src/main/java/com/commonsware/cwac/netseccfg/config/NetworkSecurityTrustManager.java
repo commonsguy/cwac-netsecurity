@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
 import android.util.ArrayMap;
 import com.commonsware.cwac.netseccfg.conscrypt.TrustManagerImpl;

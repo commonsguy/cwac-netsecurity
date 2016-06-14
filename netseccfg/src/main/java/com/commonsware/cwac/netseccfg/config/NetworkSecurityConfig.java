@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.net.ssl.X509TrustManager;
 
 /**
  * @hide

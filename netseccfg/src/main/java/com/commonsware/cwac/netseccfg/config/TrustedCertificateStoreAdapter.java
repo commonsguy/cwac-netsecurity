@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
   import com.commonsware.cwac.netseccfg.conscrypt.TrustedCertificateStore;
-  import java.io.File;
-  import java.security.cert.Certificate;
   import java.security.cert.X509Certificate;
-  import java.util.Date;
   import java.util.Set;
 
 

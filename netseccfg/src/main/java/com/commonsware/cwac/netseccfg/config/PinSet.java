@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
-import android.util.ArraySet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

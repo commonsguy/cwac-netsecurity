@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
 import java.security.cert.X509Certificate;
+import java.util.Set;
 
 /** @hide */
-public final class TrustAnchor {
-  public final X509Certificate certificate;
-  public final boolean overridesPins;
-
-  public TrustAnchor(X509Certificate certificate, boolean overridesPins) {
-    if (certificate == null) {
-      throw new NullPointerException("certificate");
-    }
-    this.certificate = certificate;
-    this.overridesPins = overridesPins;
-  }
+public interface CertificateSource {
+  Set<X509Certificate> getCertificates();
+  X509Certificate findBySubjectAndPublicKey(X509Certificate cert);
+  X509Certificate findByIssuerAndSignature(X509Certificate cert);
+  Set<X509Certificate> findAllByIssuerAndSignature(X509Certificate cert);
 }

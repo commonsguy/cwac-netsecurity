@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

@@ -1,9 +1,8 @@
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.util.ArraySet;
 import android.util.Base64;
 import android.util.Pair;
 

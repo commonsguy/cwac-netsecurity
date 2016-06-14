@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
 import android.util.Pair;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.Set;
 
 /**

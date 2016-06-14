@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.config;
 
-import android.util.Pair;
-import java.util.Set;
+import java.security.cert.X509Certificate;
 
 /** @hide */
-public interface ConfigSource {
-  Set<Pair<Domain, NetworkSecurityConfig>> getPerDomainConfigs();
-  NetworkSecurityConfig getDefaultConfig();
+public final class TrustAnchor {
+  public final X509Certificate certificate;
+  public final boolean overridesPins;
+
+  public TrustAnchor(X509Certificate certificate, boolean overridesPins) {
+    if (certificate == null) {
+      throw new NullPointerException("certificate");
+    }
+    this.certificate = certificate;
+    this.overridesPins = overridesPins;
+  }
 }
