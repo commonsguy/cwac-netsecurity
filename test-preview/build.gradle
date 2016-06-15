@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 'android-N'
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 'N'
+        targetSdkVersion 'N'
+        versionCode 1
+        versionName "1.0"
+        testApplicationId "com.commonsware.cwac.netseccfg.test.preview.forrealz"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}
+
+dependencies {
+    compile project(':test-common')
+}

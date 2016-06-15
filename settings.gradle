@@ -1,1 +1,1 @@
-include ':netseccfg'
+include ':netseccfg', ':test-common', ':test-production', ':test-preview'
