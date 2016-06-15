@@ -5,13 +5,15 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "TEST_SERVER_HOST", '"'+TEST_SERVER_HOST+'"'
     }
 }
 
 dependencies {
     compile 'com.android.support.test:rules:0.5'
+    compile project(':netseccfg')
 }
