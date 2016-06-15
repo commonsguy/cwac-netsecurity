@@ -1,1 +1,1 @@
-include ':netseccfg', ':netseccfg-spongy'
+include ':netseccfg'
