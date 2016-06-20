@@ -1,6 +1,6 @@
-package com.commonsware.cwac.netseccfg.test.common.pub;
+package com.commonsware.cwac.netseccfg.test.pub;
 
-import com.commonsware.cwac.netseccfg.test.common.AbstractHURLTest;
+import com.commonsware.cwac.netseccfg.test.AbstractHURLTest;
 
 public class SimpleHTTPSTest extends AbstractHURLTest {
   @Override

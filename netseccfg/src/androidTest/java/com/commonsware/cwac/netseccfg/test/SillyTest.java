@@ -1,4 +1,4 @@
-package com.commonsware.cwac.netseccfg.test.common;
+package com.commonsware.cwac.netseccfg.test;
 
 import android.support.test.runner.AndroidJUnit4;
 import junit.framework.Assert;

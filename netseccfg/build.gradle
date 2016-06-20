@@ -5,14 +5,15 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 24
         testApplicationId "com.commonsware.cwac.netseccfg.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "TEST_SERVER_HOST", '"'+TEST_SERVER_HOST+'"'
     }
 }
 
