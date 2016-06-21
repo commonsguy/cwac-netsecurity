@@ -43,11 +43,13 @@ public class RootTrustManagerFactorySpi extends TrustManagerFactorySpi {
 
   @Override
   public void engineInit(KeyStore ks) throws KeyStoreException {
+/*
     if (ks != null) {
       mApplicationConfig = new ApplicationConfig(new KeyStoreConfigSource(ks));
     } else {
       mApplicationConfig = ApplicationConfig.getDefaultInstance();
     }
+*/
   }
 
   @Override

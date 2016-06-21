@@ -15,6 +15,12 @@
 package com.commonsware.cwac.netseccfg;
 
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.XmlRes;
+import com.commonsware.cwac.netseccfg.config.ApplicationConfig;
+import com.commonsware.cwac.netseccfg.config.ConfigSource;
+import com.commonsware.cwac.netseccfg.config.ManifestConfigSource;
+import com.commonsware.cwac.netseccfg.config.XmlConfigSource;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -179,6 +185,32 @@ public class TrustManagerBuilder {
     mgr.add(new DenyAllTrustManager());
 
     return(this);
+  }
+
+  public TrustManagerBuilder withConfig(Context ctxt,
+                                        @XmlRes int resourceId) {
+    return(withConfig(new XmlConfigSource(ctxt, resourceId, false)));
+  }
+
+  public TrustManagerBuilder withConfig(Context ctxt,
+                                        @XmlRes int resourceId,
+                                        boolean isDebugBuild) {
+    return(withConfig(new XmlConfigSource(ctxt, resourceId,
+      isDebugBuild)));
+  }
+
+  public TrustManagerBuilder withManifestConfig(Context ctxt) {
+    if (Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
+      return(withConfig(new ManifestConfigSource(ctxt)));
+    }
+
+    return(this);
+  }
+
+  public TrustManagerBuilder withConfig(ConfigSource config) {
+    ApplicationConfig appConfig=new ApplicationConfig(config);
+
+    return(addAll(appConfig.getTrustManager()));
   }
 
   /**
@@ -611,7 +643,7 @@ public class TrustManagerBuilder {
    *          the TrustManager instances to add
    * @return the builder for chained calls
    */
-  public TrustManagerBuilder addAll(TrustManager[] mgrs) {
+  public TrustManagerBuilder addAll(TrustManager... mgrs) {
     for (TrustManager tm : mgrs) {
       if (tm instanceof X509TrustManager) {
         mgr.add((X509TrustManager)tm);

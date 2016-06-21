@@ -30,8 +30,10 @@ import javax.net.ssl.X509TrustManager;
  * @hide
  */
 public final class ApplicationConfig {
+/*
   private static ApplicationConfig sInstance;
   private static Object sLock = new Object();
+*/
 
   private Set<Pair<Domain, NetworkSecurityConfig>> mConfigs;
   private NetworkSecurityConfig mDefaultConfig;
@@ -159,6 +161,7 @@ public final class ApplicationConfig {
     }
   }
 
+/*
   public static void setDefaultInstance(ApplicationConfig config) {
     synchronized (sLock) {
       sInstance = config;
@@ -170,4 +173,5 @@ public final class ApplicationConfig {
       return sInstance;
     }
   }
+*/
 }
