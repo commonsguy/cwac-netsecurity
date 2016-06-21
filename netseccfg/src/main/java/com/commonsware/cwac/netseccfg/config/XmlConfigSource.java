@@ -184,9 +184,9 @@ public class XmlConfigSource implements ConfigSource {
     if (sourceId != -1) {
       // TODO: Cache ResourceCertificateSources by sourceId
       source = new ResourceCertificateSource(sourceId, mContext);
-/*
     } else if ("system".equals(sourceString)) {
       source = SystemCertificateSource.getInstance();
+/*
     } else if ("user".equals(sourceString)) {
       source = UserCertificateSource.getInstance();
 */

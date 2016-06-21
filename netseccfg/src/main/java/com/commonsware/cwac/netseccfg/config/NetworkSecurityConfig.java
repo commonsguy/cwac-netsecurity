@@ -169,11 +169,11 @@ public final class NetworkSecurityConfig {
   public static final Builder getDefaultBuilder() {
     return new Builder()
       .setCleartextTrafficPermitted(DEFAULT_CLEARTEXT_TRAFFIC_PERMITTED)
-      .setHstsEnforced(DEFAULT_HSTS_ENFORCED);
+      .setHstsEnforced(DEFAULT_HSTS_ENFORCED)
       // System certificate store, does not bypass static pins.
-/*
       .addCertificatesEntryRef(
-        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
+        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false));
+/*
       // User certificate store, does not bypass static pins.
       .addCertificatesEntryRef(
         new CertificatesEntryRef(UserCertificateSource.getInstance(), false));
