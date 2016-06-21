@@ -1,6 +1,7 @@
 package com.commonsware.cwac.netseccfg.test.priv;
 
 import com.commonsware.cwac.netseccfg.BuildConfig;
+import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import com.commonsware.cwac.netseccfg.test.AbstractHURLTest;
 
 public class SimpleHTTPTest extends AbstractHURLTest {
@@ -10,7 +11,7 @@ public class SimpleHTTPTest extends AbstractHURLTest {
   }
 
   @Override
-  protected String getExpectedResponse() {
-    return("{\"Hello\": \"world\"}");
+  protected TrustManagerBuilder getBuilder() {
+    return(null);
   }
 }
