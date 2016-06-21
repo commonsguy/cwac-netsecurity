@@ -3,6 +3,7 @@ package com.commonsware.cwac.netseccfg.test;
 import android.support.test.runner.AndroidJUnit4;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import java.io.IOException;
@@ -15,11 +16,13 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 
 @RunWith(AndroidJUnit4.class)
 abstract public class AbstractHURLTest {
   abstract protected String getUrl();
-  abstract protected TrustManagerBuilder getBuilder();
+  abstract protected TrustManagerBuilder getBuilder()
+    throws Exception;
 
   @Test
   public void testRequest() throws Exception {
@@ -37,18 +40,33 @@ abstract public class AbstractHURLTest {
       }
     }
 
-    InputStream in=c.getInputStream();
-
     try {
-      Assert.assertEquals(getExpectedResponse(), slurp(in));
+      InputStream in=c.getInputStream();
+
+      try {
+        if (!isPositiveTest()) {
+          throw new AssertionFailedError("Expected SSLHandshakeException, did not get!");
+        }
+
+        Assert.assertEquals(getExpectedResponse(), slurp(in));
+      }
+      finally {
+        in.close();
+      }
     }
-    finally {
-      in.close();
+    catch (SSLHandshakeException e) {
+      if (isPositiveTest()) {
+        throw e;
+      }
     }
   }
 
   protected String getExpectedResponse() {
     return("{\"Hello\": \"world\"}");
+  }
+
+  protected boolean isPositiveTest() {
+    return(true);
   }
 
   // based on http://stackoverflow.com/a/309718/115145
