@@ -1,4 +1,4 @@
-package com.commonsware.cwac.netseccfg.test;
+package com.commonsware.cwac.netseccfg;
 
 import android.support.test.runner.AndroidJUnit4;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.TrustManager;
 
 @RunWith(AndroidJUnit4.class)
 abstract public class AbstractHURLTest {
@@ -34,8 +35,9 @@ abstract public class AbstractHURLTest {
 
       if (builder!=null) {
         SSLContext ssl=SSLContext.getInstance("TLS");
+        TrustManager[] trustManagers=builder.buildArray();
 
-        ssl.init(null, builder.buildArray(), null);
+        ssl.init(null, trustManagers, null);
         ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
       }
     }
