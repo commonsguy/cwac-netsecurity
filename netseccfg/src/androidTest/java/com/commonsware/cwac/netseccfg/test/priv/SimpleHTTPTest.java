@@ -1,6 +1,6 @@
-package com.commonsware.cwac.netseccfg.priv;
+package com.commonsware.cwac.netseccfg.test.priv;
 
-import com.commonsware.cwac.netseccfg.AbstractHURLTest;
+import com.commonsware.cwac.netseccfg.test.AbstractHURLTest;
 import com.commonsware.cwac.netseccfg.BuildConfig;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 

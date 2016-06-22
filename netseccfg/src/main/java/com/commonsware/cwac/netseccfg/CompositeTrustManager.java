@@ -120,6 +120,7 @@ public class CompositeTrustManager implements X509Extensions {
                                  String authType)
     throws CertificateException {
     CertificateException first=null;
+    boolean anyGoodResults=false;
 
     for (X509Extensions mgr : managers) {
       try {
@@ -130,9 +131,7 @@ public class CompositeTrustManager implements X509Extensions {
           mgr.checkServerTrusted(chain, authType, host);
         }
 
-        if (!matchAll) {
-          return;
-        }
+        anyGoodResults=true;
       }
       catch (CertificateException e) {
         if (matchAll) {
@@ -144,7 +143,7 @@ public class CompositeTrustManager implements X509Extensions {
       }
     }
 
-    if (first != null) {
+    if (!matchAll && !anyGoodResults && first!=null) {
       throw first;
     }
   }
@@ -154,13 +153,13 @@ public class CompositeTrustManager implements X509Extensions {
                                                   String hostname)
     throws CertificateException {
     CertificateException first=null;
+    boolean anyGoodResults=false;
     List<X509Certificate> result=null;
 
     for (X509Extensions mgr : managers) {
       try {
         result=mgr.checkServerTrusted(certs, authType, hostname);
-
-        if (!matchAll) break;
+        anyGoodResults=true;
       }
       catch (CertificateException e) {
         if (matchAll) {
@@ -172,7 +171,7 @@ public class CompositeTrustManager implements X509Extensions {
       }
     }
 
-    if (first != null) {
+    if (!matchAll && !anyGoodResults && first!=null) {
       throw first;
     }
 

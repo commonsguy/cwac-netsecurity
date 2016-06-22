@@ -1,13 +1,18 @@
-package com.commonsware.cwac.netseccfg.pub;
+package com.commonsware.cwac.netseccfg.test.pub;
 
 import android.support.test.InstrumentationRegistry;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import com.commonsware.cwac.netseccfg.test.R;
 
-public class PinMatchTest extends SimpleHTTPSTest {
+public class SpecificAuthorityMismatchTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
     return(new TrustManagerBuilder().withConfig(
-      InstrumentationRegistry.getContext(), R.xml.valid_pin, false));
+      InstrumentationRegistry.getContext(), R.xml.verisign, false));
+  }
+
+  @Override
+  protected boolean isPositiveTest() {
+    return(false);
   }
 }

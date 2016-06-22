@@ -27,12 +27,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -105,6 +109,19 @@ public class TrustManagerBuilder {
     return(new X509TrustManager[] { build() });
   }
 
+  public HttpURLConnection applyTo(HttpURLConnection c)
+    throws NoSuchAlgorithmException, KeyManagementException {
+    if (c instanceof HttpsURLConnection && mgr.size()>0) {
+      SSLContext ssl=SSLContext.getInstance("TLS");
+      TrustManager[] trustManagers=buildArray();
+
+      ssl.init(null, trustManagers, null);
+      ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
+    }
+
+    return(c);
+  }
+
   /**
    * Any subsequent configuration of this builder, until the
    * next and() call (or build()/buildArray()), will be
@@ -163,8 +180,7 @@ public class TrustManagerBuilder {
    * @throws KeyStoreException
    */
   public TrustManagerBuilder useDefault()
-                                         throws NoSuchAlgorithmException,
-                                         KeyStoreException {
+    throws NoSuchAlgorithmException, KeyStoreException {
     TrustManagerFactory tmf=
         TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 

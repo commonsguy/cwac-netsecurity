@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="com.commonsware.cwac.netseccfg.okhttp3.test"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:versionCode="1"
+  android:versionName="1.0">
+
+  <application>
+<!--
+    <meta-data
+      android:name="android.security.net.config"
+      android:resource="@xml/thawte" />
+-->
+  </application>
+
+</manifest>

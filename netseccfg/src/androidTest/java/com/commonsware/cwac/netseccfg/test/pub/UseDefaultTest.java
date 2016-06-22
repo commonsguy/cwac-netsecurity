@@ -1,4 +1,4 @@
-package com.commonsware.cwac.netseccfg.pub;
+package com.commonsware.cwac.netseccfg.test.pub;
 
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 

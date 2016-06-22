@@ -12,7 +12,7 @@ public class X509ExtensionsWrapper implements X509Extensions {
     "Supplied X509TrustManager does not implement X509Extensions contract";
   private final X509TrustManager tm;
   private final Method checkServerTrustedMethod;
-  private final Method isUserAddedCertificateMethod;
+  private Method isUserAddedCertificateMethod;
 
   public X509ExtensionsWrapper(X509TrustManager tm) throws IllegalArgumentException {
     this.tm=tm;
@@ -37,7 +37,7 @@ public class X509ExtensionsWrapper implements X509Extensions {
           .getMethod("isUserAddedCertificate", X509Certificate.class);
     }
     catch (NoSuchMethodException e) {
-      throw new IllegalArgumentException(ERROR_CONTRACT);
+      // ok, we'll fail gracefully for this one
     }
   }
 
@@ -69,22 +69,26 @@ public class X509ExtensionsWrapper implements X509Extensions {
 
   @Override
   public boolean isUserAddedCertificate(X509Certificate cert) {
-      try {
-        return((Boolean)isUserAddedCertificateMethod.invoke(tm, cert));
+    if (isUserAddedCertificateMethod==null) {
+      return(false);
+    }
+
+    try {
+      return((Boolean)isUserAddedCertificateMethod.invoke(tm, cert));
+    }
+    catch (IllegalAccessException e) {
+      throw new RuntimeException(ERROR_CONTRACT, e);
+    }
+    catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException) {
+        throw (RuntimeException)e.getCause();
       }
-      catch (IllegalAccessException e) {
-        throw new RuntimeException(ERROR_CONTRACT, e);
-      }
-      catch (InvocationTargetException e) {
-        if (e.getCause() instanceof RuntimeException) {
-          throw (RuntimeException)e.getCause();
-        }
-        else {
-          throw new RuntimeException("isUserAddedCertificat() failure",
-            e.getCause());
-        }
+      else {
+        throw new RuntimeException("isUserAddedCertificat() failure",
+          e.getCause());
       }
     }
+  }
 
   @Override
   public void checkClientTrusted(X509Certificate[] x509Certificates,

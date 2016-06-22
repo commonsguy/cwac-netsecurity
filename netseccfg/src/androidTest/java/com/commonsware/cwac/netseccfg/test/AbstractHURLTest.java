@@ -1,4 +1,4 @@
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.test;
 
 import android.support.test.runner.AndroidJUnit4;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
@@ -34,11 +34,7 @@ abstract public class AbstractHURLTest {
       TrustManagerBuilder builder=getBuilder();
 
       if (builder!=null) {
-        SSLContext ssl=SSLContext.getInstance("TLS");
-        TrustManager[] trustManagers=builder.buildArray();
-
-        ssl.init(null, trustManagers, null);
-        ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
+        builder.applyTo(c);
       }
     }
 

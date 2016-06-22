@@ -1,15 +1,13 @@
-package com.commonsware.cwac.netseccfg;
+package com.commonsware.cwac.netseccfg.okhttp3.test;
 
 import android.support.test.runner.AndroidJUnit4;
+import com.commonsware.cwac.netseccfg.OkHttp3Integrator;
+import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import java.io.IOException;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.TrustManager;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -29,16 +27,7 @@ abstract public class AbstractOkHttp3Test {
     final OkHttpClient.Builder builder=new OkHttpClient.Builder();
 
     if (tmb!=null) {
-      SSLContext ssl=SSLContext.getInstance("TLS");
-      CompositeTrustManager trustManager=tmb.build();
-
-      ssl.init(null, new TrustManager[] { trustManager }, null);
-      builder.sslSocketFactory(ssl.getSocketFactory(), trustManager);
-
-      X509Interceptor interceptor=new X509Interceptor(trustManager);
-
-      builder.addInterceptor(interceptor);
-      builder.addNetworkInterceptor(interceptor);
+      OkHttp3Integrator.applyTo(tmb, builder);
     }
 
     try {
@@ -63,23 +52,5 @@ abstract public class AbstractOkHttp3Test {
 
   protected boolean isPositiveTest() {
     return(true);
-  }
-
-  static class X509Interceptor implements Interceptor {
-    private final CompositeTrustManager trustManager;
-
-    public X509Interceptor(
-      CompositeTrustManager trustManager) {
-      this.trustManager=trustManager;
-    }
-
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-      Request request=chain.request();
-
-      trustManager.setHost(request.url().host());
-
-      return(chain.proceed(request));
-    }
   }
 }
