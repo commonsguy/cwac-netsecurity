@@ -90,10 +90,10 @@ public class TrustManagerBuilder {
   }
 
   /**
-   * @return the TrustManager representing the particular
+   * @return the CompositeTrustManager representing the particular
    *         rules you want to apply
    */
-  public TrustManager build() {
+  public CompositeTrustManager build() {
     return(mgr);
   }
 
@@ -101,8 +101,8 @@ public class TrustManagerBuilder {
    * @return the TrustManager from build(), wrapped into a
    *         one-element array, for convenience
    */
-  public TrustManager[] buildArray() {
-    return(new TrustManager[] { build() });
+  public X509TrustManager[] buildArray() {
+    return(new X509TrustManager[] { build() });
   }
 
   /**

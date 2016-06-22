@@ -14,16 +14,21 @@
 
 package com.commonsware.cwac.netseccfg;
 
+import android.net.http.X509TrustManagerExtensions;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
-public class CompositeTrustManager implements X509TrustManager {
-  private ArrayList<X509TrustManager> managers=
-      new ArrayList<X509TrustManager>();
+public class CompositeTrustManager implements X509Extensions {
+  private ArrayList<X509Extensions> managers=new ArrayList<>();
   private boolean matchAll;
+  private String host;
 
   public static CompositeTrustManager matchAll(X509TrustManager... managers) {
     return(new CompositeTrustManager(managers, true));
@@ -42,13 +47,22 @@ public class CompositeTrustManager implements X509TrustManager {
     setMatchAll(matchAll);
   }
 
+  void setHost(String host) {
+    this.host=host;
+  }
+
   public void add(X509TrustManager mgr) {
-    managers.add(mgr);
+    if (mgr instanceof X509Extensions) {
+      managers.add((X509Extensions)mgr);
+    }
+    else {
+      managers.add(new X509ExtensionsWrapper(mgr));
+    }
   }
 
   public void addAll(X509TrustManager[] mgrs) {
     for (X509TrustManager mgr : mgrs) {
-      managers.add(mgr);
+      add(mgr);
     }
   }
   
@@ -68,10 +82,14 @@ public class CompositeTrustManager implements X509TrustManager {
     return(managers.size());
   }
 
+  X509TrustManager getFirst() {
+    return(managers.get(0));
+  }
+
   @Override
   public void checkClientTrusted(X509Certificate[] chain,
                                  String authType)
-                                                 throws CertificateException {
+    throws CertificateException {
     CertificateException first=null;
 
     for (X509TrustManager mgr : managers) {
@@ -100,12 +118,17 @@ public class CompositeTrustManager implements X509TrustManager {
   @Override
   public void checkServerTrusted(X509Certificate[] chain,
                                  String authType)
-                                                 throws CertificateException {
+    throws CertificateException {
     CertificateException first=null;
 
-    for (X509TrustManager mgr : managers) {
+    for (X509Extensions mgr : managers) {
       try {
-        mgr.checkClientTrusted(chain, authType);
+        if (host==null) {
+          mgr.checkServerTrusted(chain, authType);
+        }
+        else {
+          mgr.checkServerTrusted(chain, authType, host);
+        }
 
         if (!matchAll) {
           return;
@@ -124,6 +147,54 @@ public class CompositeTrustManager implements X509TrustManager {
     if (first != null) {
       throw first;
     }
+  }
+
+  public List<X509Certificate> checkServerTrusted(X509Certificate[] certs,
+                                                  String authType,
+                                                  String hostname)
+    throws CertificateException {
+    CertificateException first=null;
+    List<X509Certificate> result=null;
+
+    for (X509Extensions mgr : managers) {
+      try {
+        result=mgr.checkServerTrusted(certs, authType, hostname);
+
+        if (!matchAll) break;
+      }
+      catch (CertificateException e) {
+        if (matchAll) {
+          throw e;
+        }
+        else {
+          first=e;
+        }
+      }
+    }
+
+    if (first != null) {
+      throw first;
+    }
+
+    return(result);
+  }
+
+  @Override
+  public boolean isUserAddedCertificate(X509Certificate cert) {
+    boolean result=false;
+
+    for (X509Extensions mgr : managers) {
+      boolean localResult=mgr.isUserAddedCertificate(cert);
+
+      if (matchAll) {
+        result=result && localResult;
+      }
+      else if (localResult) {
+        return(true);
+      }
+    }
+
+    return(result);
   }
 
   @Override
