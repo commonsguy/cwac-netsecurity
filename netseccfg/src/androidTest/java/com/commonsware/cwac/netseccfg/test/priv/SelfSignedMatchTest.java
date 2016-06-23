@@ -1,13 +1,14 @@
-package com.commonsware.cwac.netseccfg.okhttp3.test.pub;
+package com.commonsware.cwac.netseccfg.test.priv;
 
 import android.support.test.InstrumentationRegistry;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
-import com.commonsware.cwac.netseccfg.okhttp3.test.R;
+import com.commonsware.cwac.netseccfg.test.R;
 
-public class ExpiredPinTest extends SimpleHTTPSTest {
+public class SelfSignedMatchTest extends AbstractPrivateTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
     return(new TrustManagerBuilder().withConfig(
-      InstrumentationRegistry.getContext(), R.xml.expired_pin, false));
+      InstrumentationRegistry.getContext(), R.xml.selfsigned,
+      true));
   }
 }

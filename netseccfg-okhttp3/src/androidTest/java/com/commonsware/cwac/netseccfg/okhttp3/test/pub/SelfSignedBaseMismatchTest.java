@@ -4,11 +4,12 @@ import android.support.test.InstrumentationRegistry;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import com.commonsware.cwac.netseccfg.okhttp3.test.R;
 
-public class InvalidPinTest extends SimpleHTTPSTest {
+public class SelfSignedBaseMismatchTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
     return(new TrustManagerBuilder().withConfig(
-      InstrumentationRegistry.getContext(), R.xml.invalid_pin, false));
+      InstrumentationRegistry.getContext(), R.xml.selfsigned_base,
+      false));
   }
 
   @Override
