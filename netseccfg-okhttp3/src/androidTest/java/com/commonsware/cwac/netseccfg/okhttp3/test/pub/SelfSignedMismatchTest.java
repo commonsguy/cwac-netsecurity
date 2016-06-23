@@ -8,7 +8,8 @@ public class SelfSignedMismatchTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
     return(new TrustManagerBuilder().withConfig(
-      InstrumentationRegistry.getContext(), R.xml.selfsigned, false));
+      InstrumentationRegistry.getContext(),
+      R.xml.selfsigned_mismatch, false));
   }
 
   @Override
