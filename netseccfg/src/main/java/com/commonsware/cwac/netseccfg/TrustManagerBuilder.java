@@ -16,6 +16,7 @@ package com.commonsware.cwac.netseccfg;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.XmlRes;
 import com.commonsware.cwac.netseccfg.config.ApplicationConfig;
 import com.commonsware.cwac.netseccfg.config.ConfigSource;
@@ -57,41 +58,8 @@ import javax.net.ssl.X509TrustManager;
  * require).
  */
 public class TrustManagerBuilder {
-  private static final String X509="X.509";
-  private static final String BKS="BKS";
-
   private CompositeTrustManager mgr=CompositeTrustManager.matchAll();
-  private Context ctxt=null;
   private MemorizingTrustManager memo=null;
-
-  /**
-   * Empty constructor. Use this only if you plan on
-   * avoiding methods that take an asset path or a raw
-   * resource ID as parameters. If you want to use those,
-   * use the one-parameter constructor that takes a Context
-   * as input.
-   */
-  public TrustManagerBuilder() {
-    this(null);
-  }
-
-  /**
-   * Typical constructor for TrustManagerBuilder, allowing
-   * full use of the builder API. The Context you choose
-   * should be appropriately scoped for the lifetime of the
-   * TrustManagerBuilder. However, the Context is not part
-   * of the generated TrustManager. Hence, usually the
-   * Context that is the component using the
-   * TrustManagerBuilder (e.g., the Service) will be a fine
-   * Context to use here.
-   * 
-   * @param ctxt
-   *          Context to use for asset and raw resource
-   *          access
-   */
-  public TrustManagerBuilder(Context ctxt) {
-    this.ctxt=ctxt;
-  }
 
   /**
    * @return the CompositeTrustManager representing the particular
@@ -203,19 +171,19 @@ public class TrustManagerBuilder {
     return(this);
   }
 
-  public TrustManagerBuilder withConfig(Context ctxt,
+  public TrustManagerBuilder withConfig(@NonNull Context ctxt,
                                         @XmlRes int resourceId) {
     return(withConfig(new XmlConfigSource(ctxt, resourceId, false)));
   }
 
-  public TrustManagerBuilder withConfig(Context ctxt,
+  public TrustManagerBuilder withConfig(@NonNull Context ctxt,
                                         @XmlRes int resourceId,
                                         boolean isDebugBuild) {
     return(withConfig(new XmlConfigSource(ctxt, resourceId,
       isDebugBuild)));
   }
 
-  public TrustManagerBuilder withManifestConfig(Context ctxt) {
+  public TrustManagerBuilder withManifestConfig(@NonNull Context ctxt) {
     if (Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
       return(withConfig(new ManifestConfigSource(ctxt)));
     }
@@ -223,396 +191,10 @@ public class TrustManagerBuilder {
     return(this);
   }
 
-  public TrustManagerBuilder withConfig(ConfigSource config) {
+  TrustManagerBuilder withConfig(@NonNull ConfigSource config) {
     ApplicationConfig appConfig=new ApplicationConfig(config);
 
     return(addAll(appConfig.getTrustManager()));
-  }
-
-  /**
-   * Allow a specific certificate authority (CA), using a
-   * certificate file supplied by that CA. Used if the SSL
-   * certificate you wish to accept is not signed by a root
-   * CA that is not going to be honored by all Android
-   * device (e.g., due to OS version).
-   * 
-   * The certificate file is assumed to be in X.509 format.
-   * To use a different supported Certificate format, use
-   * the two-parameter version of allowCA().
-   * 
-   * @param caFile
-   *          certificate file on local filesystem
-   * @return the builder for chained calls
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyStoreException
-   * @throws IOException
-   */
-  public TrustManagerBuilder allowCA(File caFile)
-                                                 throws CertificateException,
-                                                 NoSuchAlgorithmException,
-                                                 KeyStoreException,
-                                                 IOException {
-    return(allowCA(caFile, X509));
-  }
-
-  /**
-   * Allow a specific certificate authority (CA), using a
-   * certificate file supplied by that CA. Used if the SSL
-   * certificate you wish to accept is not signed by a root
-   * CA that is not going to be honored by all Android
-   * device (e.g., due to OS version).
-   * 
-   * @param caFile
-   *          certificate file on local file system
-   * @param certType
-   *          certificate format
-   * @return the builder for chained calls
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyStoreException
-   * @throws IOException
-   */
-  public TrustManagerBuilder allowCA(File caFile, String certType)
-                                                                  throws CertificateException,
-                                                                  NoSuchAlgorithmException,
-                                                                  KeyStoreException,
-                                                                  IOException {
-    InputStream in=new BufferedInputStream(new FileInputStream(caFile));
-
-    addAll(TrustManagers.allowCA(in, certType));
-
-    return(this);
-  }
-
-  /**
-   * Allow a specific certificate authority (CA), using a
-   * certificate file supplied by that CA. Used if the SSL
-   * certificate you wish to accept is not signed by a root
-   * CA that is not going to be honored by all Android
-   * device (e.g., due to OS version).
-   * 
-   * The certificate file is assumed to be in X.509 format.
-   * To use a different supported Certificate format, use
-   * the two-parameter version of allowCA().
-   * 
-   * @param rawResourceId
-   *          raw resource ID for the certificate
-   * @return the builder for chained calls
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyStoreException
-   * @throws IOException
-   */
-  public TrustManagerBuilder allowCA(int rawResourceId)
-                                                       throws CertificateException,
-                                                       NoSuchAlgorithmException,
-                                                       KeyStoreException,
-                                                       IOException {
-    return(allowCA(rawResourceId, X509));
-  }
-
-  /**
-   * Allow a specific certificate authority (CA), using a
-   * certificate file supplied by that CA. Used if the SSL
-   * certificate you wish to accept is not signed by a root
-   * CA that is not going to be honored by all Android
-   * device (e.g., due to OS version).
-   * 
-   * @param rawResourceId
-   *          raw resource ID for the certificate
-   * @param certType
-   *          certificate format
-   * @return the builder for chained calls
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyStoreException
-   * @throws IOException
-   */
-  public TrustManagerBuilder allowCA(int rawResourceId, String certType)
-                                                                        throws CertificateException,
-                                                                        NoSuchAlgorithmException,
-                                                                        KeyStoreException,
-                                                                        IOException {
-    checkContext();
-
-    InputStream in=ctxt.getResources().openRawResource(rawResourceId);
-
-    addAll(TrustManagers.allowCA(in, certType));
-
-    return(this);
-  }
-
-  /**
-   * Allow a specific certificate authority (CA), using a
-   * certificate file supplied by that CA. Used if the SSL
-   * certificate you wish to accept is not signed by a root
-   * CA that is not going to be honored by all Android
-   * device (e.g., due to OS version).
-   * 
-   * The certificate file is assumed to be in X.509 format.
-   * To use a different supported Certificate format, use
-   * the two-parameter version of allowCA().
-   * 
-   * @param assetPath
-   *          path within assets/ of your project where the
-   *          certificate file resides
-   * @return the builder for chained calls
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyStoreException
-   * @throws IOException
-   */
-  public TrustManagerBuilder allowCA(String assetPath)
-                                                      throws CertificateException,
-                                                      NoSuchAlgorithmException,
-                                                      KeyStoreException,
-                                                      IOException {
-    return(allowCA(assetPath, X509));
-  }
-
-  /**
-   * Allow a specific certificate authority (CA), using a
-   * certificate file supplied by that CA. Used if the SSL
-   * certificate you wish to accept is not signed by a root
-   * CA that is not going to be honored by all Android
-   * device (e.g., due to OS version).
-   * 
-   * @param assetPath
-   *          path within assets/ of your project where the
-   *          certificate file resides
-   * @param certType
-   *          certificate format
-   * @return the builder for chained calls
-   * @throws CertificateException
-   * @throws NoSuchAlgorithmException
-   * @throws KeyStoreException
-   * @throws IOException
-   */
-  public TrustManagerBuilder allowCA(String assetPath, String certType)
-                                                                       throws CertificateException,
-                                                                       NoSuchAlgorithmException,
-                                                                       KeyStoreException,
-                                                                       IOException {
-    checkContext();
-
-    InputStream in=ctxt.getAssets().open(assetPath);
-
-    addAll(TrustManagers.allowCA(in, certType));
-
-    return(this);
-  }
-
-  /**
-   * Support a specific self-signed certificate. The
-   * password is a char[] to allow you to wipe out that
-   * password (e.g., set all element to nulls) after use, to
-   * get rid of it from memory as soon as possible. That, of
-   * course, is only relevant if the password is retrievable
-   * dynamically and in the form of a char[] (e.g., you read
-   * it yourself from a file). For cases where this level of
-   * security is unnecessary (e.g., the password is
-   * hard-coded), just use toCharArray() on a String to get
-   * a char[] to use.
-   * 
-   * This method assumes that the keystore is in BKS format.
-   * If you are using some other format supported by
-   * KeyStore, use the three-parameter version of this
-   * method().
-   * 
-   * @param store
-   *          path to keystore file on local file system
-   * @param password
-   *          password to use to access keystore file
-   * @return the builder for chained calls
-   * @throws NullPointerException
-   * @throws GeneralSecurityException
-   * @throws IOException
-   */
-  public TrustManagerBuilder selfSigned(File store, char[] password)
-                                                                    throws NullPointerException,
-                                                                    GeneralSecurityException,
-                                                                    IOException {
-    return(selfSigned(store, password, BKS));
-  }
-
-  /**
-   * Support a specific self-signed certificate. The
-   * password is a char[] to allow you to wipe out that
-   * password (e.g., set all element to nulls) after use, to
-   * get rid of it from memory as soon as possible. That, of
-   * course, is only relevant if the password is retrievable
-   * dynamically and in the form of a char[] (e.g., you read
-   * it yourself from a file). For cases where this level of
-   * security is unnecessary (e.g., the password is
-   * hard-coded), just use toCharArray() on a String to get
-   * a char[] to use.
-   * 
-   * @param store
-   *          path to keystore file on local file system
-   * @param password
-   *          password to use to access keystore file
-   * @param format
-   *          format of keystore file
-   * @return the builder for chained calls
-   * @throws NullPointerException
-   * @throws GeneralSecurityException
-   * @throws IOException
-   */
-  public TrustManagerBuilder selfSigned(File store, char[] password,
-                                        String format)
-                                                      throws NullPointerException,
-                                                      GeneralSecurityException,
-                                                      IOException {
-    InputStream in=new BufferedInputStream(new FileInputStream(store));
-
-    addAll(TrustManagers.useTrustStore(in, password, format));
-
-    return(this);
-  }
-
-  /**
-   * Support a specific self-signed certificate. The
-   * password is a char[] to allow you to wipe out that
-   * password (e.g., set all element to nulls) after use, to
-   * get rid of it from memory as soon as possible. That, of
-   * course, is only relevant if the password is retrievable
-   * dynamically and in the form of a char[] (e.g., you read
-   * it yourself from a file). For cases where this level of
-   * security is unnecessary (e.g., the password is
-   * hard-coded), just use toCharArray() on a String to get
-   * a char[] to use.
-   * 
-   * This method assumes that the keystore is in BKS format.
-   * If you are using some other format supported by
-   * KeyStore, use the three-parameter version of this
-   * method().
-   * 
-   * @param rawResourceId
-   *          raw resource ID referencing this keystore
-   * @param password
-   *          password to use to access keystore file
-   * @return the builder for chained calls
-   * @throws NullPointerException
-   * @throws GeneralSecurityException
-   * @throws IOException
-   */
-  public TrustManagerBuilder selfSigned(int rawResourceId,
-                                        char[] password)
-                                                        throws NullPointerException,
-                                                        GeneralSecurityException,
-                                                        IOException {
-    return(selfSigned(rawResourceId, password, BKS));
-  }
-
-  /**
-   * Support a specific self-signed certificate. The
-   * password is a char[] to allow you to wipe out that
-   * password (e.g., set all element to nulls) after use, to
-   * get rid of it from memory as soon as possible. That, of
-   * course, is only relevant if the password is retrievable
-   * dynamically and in the form of a char[] (e.g., you read
-   * it yourself from a file). For cases where this level of
-   * security is unnecessary (e.g., the password is
-   * hard-coded), just use toCharArray() on a String to get
-   * a char[] to use.
-   * 
-   * @param rawResourceId
-   *          raw resource ID referencing this keystore
-   * @param password
-   *          password to use to access keystore file
-   * @param format
-   *          format for the keystore
-   * @return the builder for chained calls
-   * @throws NullPointerException
-   * @throws GeneralSecurityException
-   * @throws IOException
-   */
-  public TrustManagerBuilder selfSigned(int rawResourceId,
-                                        char[] password, String format)
-                                                                       throws NullPointerException,
-                                                                       GeneralSecurityException,
-                                                                       IOException {
-    checkContext();
-
-    InputStream in=ctxt.getResources().openRawResource(rawResourceId);
-
-    addAll(TrustManagers.useTrustStore(in, password, format));
-
-    return(this);
-  }
-
-  /**
-   * Support a specific self-signed certificate. The
-   * password is a char[] to allow you to wipe out that
-   * password (e.g., set all element to nulls) after use, to
-   * get rid of it from memory as soon as possible. That, of
-   * course, is only relevant if the password is retrievable
-   * dynamically and in the form of a char[] (e.g., you read
-   * it yourself from a file). For cases where this level of
-   * security is unnecessary (e.g., the password is
-   * hard-coded), just use toCharArray() on a String to get
-   * a char[] to use.
-   * 
-   * This method assumes that the keystore is in BKS format.
-   * If you are using some other format supported by
-   * KeyStore, use the three-parameter version of this
-   * method().
-   * 
-   * @param assetPath
-   *          relative path within assets/ where the
-   *          keystore is located
-   * @param password
-   *          password to use to access keystore file
-   * @return the builder for chained calls
-   * @throws IOException
-   * @throws NullPointerException
-   * @throws GeneralSecurityException
-   */
-  public TrustManagerBuilder selfSigned(String assetPath,
-                                        char[] password)
-                                                        throws IOException,
-                                                        NullPointerException,
-                                                        GeneralSecurityException {
-    return(selfSigned(assetPath, password, BKS));
-  }
-
-  /**
-   * Support a specific self-signed certificate. The
-   * password is a char[] to allow you to wipe out that
-   * password (e.g., set all element to nulls) after use, to
-   * get rid of it from memory as soon as possible. That, of
-   * course, is only relevant if the password is retrievable
-   * dynamically and in the form of a char[] (e.g., you read
-   * it yourself from a file). For cases where this level of
-   * security is unnecessary (e.g., the password is
-   * hard-coded), just use toCharArray() on a String to get
-   * a char[] to use.
-   * 
-   * @param assetPath
-   *          relative path within assets/ where the
-   *          keystore is located
-   * @param password
-   *          password to use to access keystore file
-   * @param format
-   *          keystore format
-   * @return the builder for chained calls
-   * @throws IOException
-   * @throws NullPointerException
-   * @throws GeneralSecurityException
-   */
-  public TrustManagerBuilder selfSigned(String assetPath,
-                                        char[] password, String format)
-                                                                       throws IOException,
-                                                                       NullPointerException,
-                                                                       GeneralSecurityException {
-    checkContext();
-
-    InputStream in=ctxt.getAssets().open(assetPath);
-
-    addAll(TrustManagers.useTrustStore(in, password, format));
-
-    return(this);
   }
 
   /**
@@ -631,12 +213,9 @@ public class TrustManagerBuilder {
    * @throws FileNotFoundException
    * @throws IOException
    */
-  public TrustManagerBuilder memorize(MemorizingTrustManager.Options options)
-                                                                             throws KeyStoreException,
-                                                                             NoSuchAlgorithmException,
-                                                                             CertificateException,
-                                                                             FileNotFoundException,
-                                                                             IOException {
+  public TrustManagerBuilder memorize(@NonNull MemorizingTrustManager.Options options)
+    throws KeyStoreException, NoSuchAlgorithmException,
+    CertificateException, IOException {
     if (memo != null) {
       throw new IllegalStateException(
                                       "Cannot add a 2nd MemorizingTrustManager");
@@ -697,10 +276,8 @@ public class TrustManagerBuilder {
    * @throws IOException
    */
   public void memorizeCert(X509Certificate[] chain)
-                                                   throws KeyStoreException,
-                                                   NoSuchAlgorithmException,
-                                                   CertificateException,
-                                                   IOException {
+    throws KeyStoreException, NoSuchAlgorithmException,
+    CertificateException, IOException {
     memo.storeCert(chain);
   }
 
@@ -732,8 +309,7 @@ public class TrustManagerBuilder {
    * @throws NoSuchAlgorithmException
    */
   public void allowCertOnce(X509Certificate[] chain)
-                                                    throws KeyStoreException,
-                                                    NoSuchAlgorithmException {
+    throws KeyStoreException, NoSuchAlgorithmException {
     memo.allowOnce(chain);
   }
 
@@ -752,17 +328,8 @@ public class TrustManagerBuilder {
    * @throws IOException
    */
   public void clearMemorizedCerts(boolean clearPersistent)
-                                                          throws KeyStoreException,
-                                                          NoSuchAlgorithmException,
-                                                          CertificateException,
-                                                          IOException {
+    throws KeyStoreException, NoSuchAlgorithmException,
+    CertificateException, IOException {
     memo.clear(clearPersistent);
-  }
-
-  private void checkContext() {
-    if (ctxt == null) {
-      throw new IllegalArgumentException(
-                                         "Must use constructor supplying a Context");
-    }
   }
 }
