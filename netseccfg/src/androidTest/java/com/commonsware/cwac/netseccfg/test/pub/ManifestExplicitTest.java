@@ -1,17 +1,17 @@
 package com.commonsware.cwac.netseccfg.test.pub;
 
-import android.os.Build;
+import android.support.test.InstrumentationRegistry;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 
-public class UseDefaultTest extends SimpleHTTPSTest {
+public class ManifestExplicitTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
-    return(new TrustManagerBuilder().useDefault());
+    return(new TrustManagerBuilder()
+      .withManifestConfig(InstrumentationRegistry.getContext()));
   }
 
-  // on N+, fail because of manifest config
   @Override
   protected boolean isPositiveTest() {
-    return(Build.VERSION.SDK_INT<Build.VERSION_CODES.N);
+    return(false);
   }
 }

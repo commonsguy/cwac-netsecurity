@@ -11,4 +11,9 @@ public class SelfSignedSystemTest extends SimpleHTTPSTest {
       InstrumentationRegistry.getContext(), R.xml.selfsigned_system,
       false));
   }
+
+  @Override
+  protected boolean isPositiveTest() {
+    return(true);
+  }
 }

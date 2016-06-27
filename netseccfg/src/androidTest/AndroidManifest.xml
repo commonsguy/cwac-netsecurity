@@ -4,12 +4,10 @@
   android:versionCode="1"
   android:versionName="1.0">
 
-  <application>
-<!--
+  <application android:networkSecurityConfig="@xml/verisign">
     <meta-data
       android:name="android.security.net.config"
-      android:resource="@xml/thawte" />
--->
+      android:resource="@xml/verisign" />
   </application>
 
 </manifest>
