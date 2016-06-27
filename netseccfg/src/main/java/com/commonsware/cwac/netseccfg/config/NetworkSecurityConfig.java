@@ -16,12 +16,12 @@
 
 package com.commonsware.cwac.netseccfg.config;
 
-import android.util.ArrayMap;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +77,7 @@ public final class NetworkSecurityConfig {
       // without, the one with overridesPins wins.
       // Because mCertificatesEntryRefs is sorted with all overridesPins anchors coming first
       // this can be simplified to just using the first occurrence of a certificate.
-      Map<X509Certificate, TrustAnchor> anchorMap = new ArrayMap<>();
+      Map<X509Certificate, TrustAnchor> anchorMap = new HashMap<>();
       for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
         Set<TrustAnchor> anchors = ref.getTrustAnchors();
         for (TrustAnchor anchor : anchors) {

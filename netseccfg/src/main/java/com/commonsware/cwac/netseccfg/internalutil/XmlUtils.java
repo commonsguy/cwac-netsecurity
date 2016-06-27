@@ -21,7 +21,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Xml;
 
@@ -58,6 +57,7 @@ public class XmlUtils {
     }
   }
 
+/*
   public static final int
   convertValueToList(CharSequence value, String[] options, int defaultValue)
   {
@@ -140,7 +140,9 @@ public class XmlUtils {
 
     return parseUnsignedIntAttribute(value);
   }
+*/
 
+/*
   public static int parseUnsignedIntAttribute(CharSequence charSeq) {
     String  value = charSeq.toString();
 
@@ -170,6 +172,7 @@ public class XmlUtils {
 
     return (int) Long.parseLong(value.substring(index), base);
   }
+*/
 
   /**
    * Flatten a Map into an output stream as XML.  The map can later be
@@ -183,6 +186,7 @@ public class XmlUtils {
    * @see #writeValueXml
    * @see #readMapXml
    */
+/*
   public static final void writeMapXml(Map val, OutputStream out)
     throws XmlPullParserException, java.io.IOException {
     XmlSerializer serializer = new FastXmlSerializer();
@@ -192,6 +196,7 @@ public class XmlUtils {
     writeMapXml(val, null, serializer);
     serializer.endDocument();
   }
+*/
 
   /**
    * Flatten a List into an output stream as XML.  The list can later be
@@ -205,6 +210,7 @@ public class XmlUtils {
    * @see #writeValueXml
    * @see #readListXml
    */
+/*
   public static final void writeListXml(List val, OutputStream out)
     throws XmlPullParserException, java.io.IOException
   {
@@ -215,6 +221,7 @@ public class XmlUtils {
     writeListXml(val, null, serializer);
     serializer.endDocument();
   }
+*/
 
   /**
    * Flatten a Map into an XmlSerializer.  The map can later be read back
@@ -732,6 +739,7 @@ public class XmlUtils {
    * #see #writeMapXml
    */
   @SuppressWarnings("unchecked")
+/*
   public static final HashMap<String, ?> readMapXml(InputStream in)
     throws XmlPullParserException, java.io.IOException
   {
@@ -739,6 +747,7 @@ public class XmlUtils {
     parser.setInput(in, StandardCharsets.UTF_8.name());
     return (HashMap<String, ?>) readValueXml(parser, new String[1]);
   }
+*/
 
   /**
    * Read an ArrayList from an InputStream containing XML.  The stream can
@@ -753,6 +762,7 @@ public class XmlUtils {
    * @see #readThisListXml
    * @see #writeListXml
    */
+/*
   public static final ArrayList readListXml(InputStream in)
     throws XmlPullParserException, java.io.IOException
   {
@@ -760,6 +770,7 @@ public class XmlUtils {
     parser.setInput(in, StandardCharsets.UTF_8.name());
     return (ArrayList)readValueXml(parser, new String[1]);
   }
+*/
 
 
   /**
@@ -777,12 +788,14 @@ public class XmlUtils {
    * @see #readThisSetXml
    * @see #writeSetXml
    */
+/*
   public static final HashSet readSetXml(InputStream in)
     throws XmlPullParserException, java.io.IOException {
     XmlPullParser parser = Xml.newPullParser();
     parser.setInput(in, null);
     return (HashSet) readValueXml(parser, new String[1]);
   }
+*/
 
   /**
    * Read a HashMap object from an XmlPullParser.  The XML data could
@@ -798,10 +811,12 @@ public class XmlUtils {
    *
    * @see #readMapXml
    */
+/*
   public static final HashMap<String, ?> readThisMapXml(XmlPullParser parser, String endTag,
                                                         String[] name) throws XmlPullParserException, java.io.IOException {
     return readThisMapXml(parser, endTag, name, null);
   }
+*/
 
   /**
    * Read a HashMap object from an XmlPullParser.  The XML data could
@@ -847,11 +862,11 @@ public class XmlUtils {
    * Like {@link #readThisMapXml}, but returns an ArrayMap instead of HashMap.
    * @hide
    */
-  public static final ArrayMap<String, ?> readThisArrayMapXml(XmlPullParser parser, String endTag,
+  public static final HashMap<String, ?> readThisArrayMapXml(XmlPullParser parser, String endTag,
                                                               String[] name, ReadMapCallback callback)
     throws XmlPullParserException, java.io.IOException
   {
-    ArrayMap<String, Object> map = new ArrayMap<>();
+    HashMap<String, Object> map = new HashMap<>();
 
     int eventType = parser.getEventType();
     do {
@@ -886,10 +901,12 @@ public class XmlUtils {
    *
    * @see #readListXml
    */
+/*
   public static final ArrayList readThisListXml(XmlPullParser parser, String endTag,
                                                 String[] name) throws XmlPullParserException, java.io.IOException {
     return readThisListXml(parser, endTag, name, null, false);
   }
+*/
 
   /**
    * Read an ArrayList object from an XmlPullParser.  The XML data could
@@ -947,10 +964,12 @@ public class XmlUtils {
    *
    * @see #readSetXml
    */
+/*
   public static final HashSet readThisSetXml(XmlPullParser parser, String endTag, String[] name)
     throws XmlPullParserException, java.io.IOException {
     return readThisSetXml(parser, endTag, name, null, false);
   }
+*/
 
   /**
    * Read a HashSet object from an XmlPullParser. The XML data could previously
@@ -1321,6 +1340,7 @@ public class XmlUtils {
    * @see #readListXml
    * @see #writeValueXml
    */
+/*
   public static final Object readValueXml(XmlPullParser parser, String[] name)
     throws XmlPullParserException, java.io.IOException
   {
@@ -1341,6 +1361,7 @@ public class XmlUtils {
     throw new XmlPullParserException(
       "Unexpected end of document");
   }
+*/
 
   private static final Object readThisValueXml(XmlPullParser parser, String[] name,
                                                ReadMapCallback callback, boolean arrayMap)
@@ -1496,6 +1517,7 @@ public class XmlUtils {
     }
   }
 
+/*
   public static final void nextElement(XmlPullParser parser) throws XmlPullParserException, IOException
   {
     int type;
@@ -1504,6 +1526,7 @@ public class XmlUtils {
       ;
     }
   }
+*/
 
   public static boolean nextElementWithin(XmlPullParser parser, int outerDepth)
     throws IOException, XmlPullParserException {
@@ -1520,6 +1543,7 @@ public class XmlUtils {
     }
   }
 
+/*
   public static int readIntAttribute(XmlPullParser in, String name, int defaultValue) {
     final String value = in.getAttributeValue(null, name);
     try {
@@ -1622,7 +1646,9 @@ public class XmlUtils {
       out.attribute(null, name, value);
     }
   }
+*/
 
+/*
   public static byte[] readByteArrayAttribute(XmlPullParser in, String name) {
     final String value = in.getAttributeValue(null, name);
     if (value != null) {
@@ -1631,14 +1657,18 @@ public class XmlUtils {
       return null;
     }
   }
+*/
 
+/*
   public static void writeByteArrayAttribute(XmlSerializer out, String name, byte[] value)
     throws IOException {
     if (value != null) {
       out.attribute(null, name, Base64.encodeToString(value, Base64.DEFAULT));
     }
   }
+*/
 
+/*
   public static Bitmap readBitmapAttribute(XmlPullParser in, String name) {
     final byte[] value = readByteArrayAttribute(in, name);
     if (value != null) {
@@ -1657,6 +1687,7 @@ public class XmlUtils {
       writeByteArrayAttribute(out, name, os.toByteArray());
     }
   }
+*/
 
   /** @hide */
   public interface WriteMapCallback {

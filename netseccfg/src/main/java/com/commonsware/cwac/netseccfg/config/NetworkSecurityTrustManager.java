@@ -16,7 +16,6 @@
 
 package com.commonsware.cwac.netseccfg.config;
 
-import android.util.ArrayMap;
 import com.commonsware.cwac.netseccfg.conscrypt.TrustManagerImpl;
 import java.io.IOException;
 import java.security.cert.CertificateException;
@@ -24,6 +23,7 @@ import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +98,7 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
       return;
     }
     Set<String> pinAlgorithms = pinSet.getPinAlgorithms();
-    Map<String, MessageDigest> digestMap = new ArrayMap<String, MessageDigest>(
+    Map<String, MessageDigest> digestMap = new HashMap<>(
       pinAlgorithms.size());
     for (int i = chain.size() - 1; i >= 0 ; i--) {
       X509Certificate cert = chain.get(i);
