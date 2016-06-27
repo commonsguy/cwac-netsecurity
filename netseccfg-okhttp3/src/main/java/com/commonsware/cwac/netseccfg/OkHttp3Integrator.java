@@ -18,7 +18,7 @@ public class OkHttp3Integrator {
 
     if (trustManager.size()>0) {
       SSLContext ssl=SSLContext.getInstance("TLS");
-      X509Interceptor interceptor=new X509Interceptor(trustManager);
+      X509Interceptor interceptor=new X509Interceptor(trustManager, tmb);
 
       ssl.init(null, new TrustManager[]{trustManager}, null);
       builder.sslSocketFactory(ssl.getSocketFactory(), trustManager);
@@ -31,18 +31,34 @@ public class OkHttp3Integrator {
 
   static private class X509Interceptor implements Interceptor {
     private final CompositeTrustManager trustManager;
+    private final TrustManagerBuilder builder;
 
-    private X509Interceptor(CompositeTrustManager trustManager) {
+    private X509Interceptor(CompositeTrustManager trustManager,
+                            TrustManagerBuilder builder) {
       this.trustManager=trustManager;
+      this.builder=builder;
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
       Request request=chain.request();
+      String host=request.url().host();
 
-      trustManager.setHost(request.url().host());
+      if (request.url().scheme().equals("http") &&
+        !builder.isCleartextTrafficPermitted(host)) {
+        throw new CleartextAttemptException("Cleartext blocked for "+request.url());
+      }
+
+      trustManager.setHost(host);
 
       return(chain.proceed(request));
+    }
+  }
+
+  static public class CleartextAttemptException
+    extends RuntimeException {
+    public CleartextAttemptException(String message) {
+      super(message);
     }
   }
 }

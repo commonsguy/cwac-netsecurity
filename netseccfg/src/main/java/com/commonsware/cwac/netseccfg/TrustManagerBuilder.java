@@ -60,6 +60,7 @@ import javax.net.ssl.X509TrustManager;
 public class TrustManagerBuilder {
   private CompositeTrustManager mgr=CompositeTrustManager.matchAll();
   private MemorizingTrustManager memo=null;
+  private ApplicationConfig appConfig=null;
 
   /**
    * @return the CompositeTrustManager representing the particular
@@ -192,9 +193,25 @@ public class TrustManagerBuilder {
   }
 
   TrustManagerBuilder withConfig(@NonNull ConfigSource config) {
-    ApplicationConfig appConfig=new ApplicationConfig(config);
+    appConfig=new ApplicationConfig(config);
 
     return(addAll(appConfig.getTrustManager()));
+  }
+
+  public boolean isCleartextTrafficPermitted() {
+    if (appConfig==null) {
+      return(true);
+    }
+
+    return(appConfig.isCleartextTrafficPermitted());
+  }
+
+  public boolean isCleartextTrafficPermitted(String hostname) {
+    if (appConfig==null) {
+      return(true);
+    }
+
+    return(appConfig.isCleartextTrafficPermitted(hostname));
   }
 
   /**

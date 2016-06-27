@@ -44,6 +44,12 @@ abstract public class AbstractOkHttp3Test {
         throw e;
       }
     }
+    catch (RuntimeException e) {
+      if (isPositiveTest() ||
+        !e.getClass().getSimpleName().equals("CleartextAttemptException")) {
+        throw e;
+      }
+    }
   }
 
   protected String getExpectedResponse() {
