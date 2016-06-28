@@ -423,7 +423,7 @@ public class TrustedCertificateStore {
     Set<X509Certificate> systemCerts = findCert(systemDir, issuer, selector, Set.class);
     if (systemCerts != null) {
       if (issuers != null) {
-        issuers.addAll(systemCerts);
+        issuers.add(systemCerts);
       } else {
         issuers = systemCerts;
       }

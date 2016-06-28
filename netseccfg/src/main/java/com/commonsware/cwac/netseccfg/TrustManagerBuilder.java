@@ -22,20 +22,11 @@ import com.commonsware.cwac.netseccfg.config.ApplicationConfig;
 import com.commonsware.cwac.netseccfg.config.ConfigSource;
 import com.commonsware.cwac.netseccfg.config.ManifestConfigSource;
 import com.commonsware.cwac.netseccfg.config.XmlConfigSource;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -59,7 +50,6 @@ import javax.net.ssl.X509TrustManager;
  */
 public class TrustManagerBuilder {
   private CompositeTrustManager mgr=CompositeTrustManager.matchAll();
-  private MemorizingTrustManager memo=null;
   private ApplicationConfig appConfig=null;
 
   /**
@@ -89,6 +79,27 @@ public class TrustManagerBuilder {
     }
 
     return(c);
+  }
+
+  /**
+   * Use this to add arbitrary TrustManagers to
+   * the mix. Only the X509TrustManager instances in the
+   * array will be used. This is also used, under the
+   * covers, by most of the other builder methods, to add
+   * configured trust managers.
+   *
+   * @param mgrs
+   *          the TrustManager instances to add
+   * @return the builder for chained calls
+   */
+  public TrustManagerBuilder add(TrustManager... mgrs) {
+    for (TrustManager tm : mgrs) {
+      if (tm instanceof X509TrustManager) {
+        mgr.add((X509TrustManager)tm);
+      }
+    }
+
+    return(this);
   }
 
   /**
@@ -154,7 +165,7 @@ public class TrustManagerBuilder {
         TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 
     tmf.init((KeyStore)null);
-    addAll(tmf.getTrustManagers());
+    add(tmf.getTrustManagers());
 
     return(this);
   }
@@ -195,7 +206,7 @@ public class TrustManagerBuilder {
   TrustManagerBuilder withConfig(@NonNull ConfigSource config) {
     appConfig=new ApplicationConfig(config);
 
-    return(addAll(appConfig.getTrustManager()));
+    return(add(appConfig.getTrustManager()));
   }
 
   public boolean isCleartextTrafficPermitted() {
@@ -212,141 +223,5 @@ public class TrustManagerBuilder {
     }
 
     return(appConfig.isCleartextTrafficPermitted(hostname));
-  }
-
-  /**
-   * Enables certificate memorization for this builder. All
-   * SSL certificates need to be approved by the user before
-   * they will be accepted by the TrustManager for an actual
-   * HTTPS operation.
-   * 
-   * @param options
-   *          a MemorizingTrustManager.Options instance
-   *          configuring the memorization behavior
-   * @return the builder for chained calls
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   * @throws CertificateException
-   * @throws FileNotFoundException
-   * @throws IOException
-   */
-  public TrustManagerBuilder memorize(@NonNull MemorizingTrustManager.Options options)
-    throws KeyStoreException, NoSuchAlgorithmException,
-    CertificateException, IOException {
-    if (memo != null) {
-      throw new IllegalStateException(
-                                      "Cannot add a 2nd MemorizingTrustManager");
-    }
-
-    memo=new MemorizingTrustManager(options);
-    mgr.add(memo);
-
-    return(this);
-  }
-
-  /**
-   * Use this to add an arbitrary TrustManager[] array to
-   * the mix. Only the X509TrustManager instances in the
-   * array will be used. This is also used, under the
-   * covers, by most of the other builder methods, to add
-   * configured trust managers.
-   * 
-   * @param mgrs
-   *          the TrustManager instances to add
-   * @return the builder for chained calls
-   */
-  public TrustManagerBuilder addAll(TrustManager... mgrs) {
-    for (TrustManager tm : mgrs) {
-      if (tm instanceof X509TrustManager) {
-        mgr.add((X509TrustManager)tm);
-      }
-    }
-
-    return(this);
-  }
-
-  /**
-   * If you catch an SSLHandshakeException when performing
-   * HTTPS I/O, and its getCause() is a
-   * CertificateNotMemorizedException, then you know that
-   * you configured certificate memorization using
-   * memorize(), and the SSL certificate for your request
-   * was not recognized.
-   * 
-   * If the user agrees that your app should use the SSL
-   * certificate forever (or until you clear it), call
-   * memorizeCert(), supplying the certificate chain you get
-   * by calling getCertificateChain() on the
-   * CertificateNotMemorizedException. Note that this will
-   * perform disk I/O and therefore should be done on a
-   * background thread.
-   * 
-   * Note that this method is not part of the builder set of
-   * methods to configure a TrustManagerBuilder. Instead, it
-   * is used at runtime to handle memorization events.
-   * 
-   * @param chain
-   *          user-approved certificate chain
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   * @throws CertificateException
-   * @throws IOException
-   */
-  public void memorizeCert(X509Certificate[] chain)
-    throws KeyStoreException, NoSuchAlgorithmException,
-    CertificateException, IOException {
-    memo.storeCert(chain);
-  }
-
-  /**
-   * If you catch an SSLHandshakeException when performing
-   * HTTPS I/O, and its getCause() is a
-   * CertificateNotMemorizedException, then you know that
-   * you configured certificate memorization using
-   * memorize(), and the SSL certificate for your request
-   * was not recognized.
-   * 
-   * If the user agrees that your app should use the SSL
-   * certificate for the lifetime of this process only, but
-   * not retain it beyond that, call allowCertOnce(),
-   * supplying the certificate chain you get by calling
-   * getCertificateChain() on the
-   * CertificateNotMemorizedException. Once your process is
-   * terminated, this cached certificate is lost, and you
-   * will get a CertificateNotMemorizedException again later
-   * on.
-   * 
-   * Note that this method is not part of the builder set of
-   * methods to configure a TrustManagerBuilder. Instead, it
-   * is used at runtime to handle memorization events.
-   * 
-   * @param chain
-   *          user-approved certificate chain
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   */
-  public void allowCertOnce(X509Certificate[] chain)
-    throws KeyStoreException, NoSuchAlgorithmException {
-    memo.allowOnce(chain);
-  }
-
-  /**
-   * If you saved certificates using memorizeCert() or
-   * allowCertOnce(), you can get rid of them using this
-   * method.
-   * 
-   * @param clearPersistent
-   *          true if you want to clear all certificates
-   *          (allow-once and memorized), false if you want
-   *          to clear only allow-once certificates
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   * @throws CertificateException
-   * @throws IOException
-   */
-  public void clearMemorizedCerts(boolean clearPersistent)
-    throws KeyStoreException, NoSuchAlgorithmException,
-    CertificateException, IOException {
-    memo.clear(clearPersistent);
   }
 }

@@ -15,9 +15,9 @@
 package com.commonsware.cwac.netseccfg;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -25,6 +25,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -34,7 +37,7 @@ import javax.net.ssl.X509TrustManager;
  * https://github.com/ge0rg/MemorizingTrustManager, but
  * designed to be used by TrustManagerBuilder.
  */
-public class MemorizingTrustManager implements X509TrustManager {
+public class MemorizingTrustManager implements X509Extensions {
   private KeyStore keyStore=null;
   private Options options=null;
   private X509TrustManager storeTrustManager=null;
@@ -42,34 +45,31 @@ public class MemorizingTrustManager implements X509TrustManager {
   private X509TrustManager transientTrustManager=null;
 
   /**
+   * Standard constructor
+   *
    * @param options
    *          a MemorizingTrustManager.Options object, to
    *          configure the memorization behavior
    * @throws KeyStoreException
    * @throws NoSuchAlgorithmException
    * @throws CertificateException
-   * @throws FileNotFoundException
    * @throws IOException
    */
-  public MemorizingTrustManager(Options options)
+  public MemorizingTrustManager(@NonNull Options options)
       throws KeyStoreException, NoSuchAlgorithmException,
-      CertificateException, FileNotFoundException, IOException {
+      CertificateException, IOException {
     this.options=options;
 
     clear(false);
   }
 
   /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * javax.net.ssl.X509TrustManager#checkClientTrusted(java
-   * .security.cert.X509Certificate[], java.lang.String)
+   * {@inheritDoc}
    */
   @Override
-  synchronized public void checkClientTrusted(X509Certificate[] chain,
+  synchronized public void checkClientTrusted(@NonNull X509Certificate[] chain,
                                               String authType)
-                                                              throws CertificateException {
+    throws CertificateException {
     try {
       storeTrustManager.checkClientTrusted(chain, authType);
     }
@@ -80,7 +80,7 @@ public class MemorizingTrustManager implements X509TrustManager {
       catch (CertificateException e2) {
         if (options.trustOnFirstUse && !options.store.exists()) {
           try {
-            storeCert(chain);
+            memorizeCert(chain);
           }
           catch (Exception e3) {
             throw new CertificateMemorizationException(e3);
@@ -94,16 +94,12 @@ public class MemorizingTrustManager implements X509TrustManager {
   }
 
   /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * javax.net.ssl.X509TrustManager#checkServerTrusted(java
-   * .security.cert.X509Certificate[], java.lang.String)
+   * {@inheritDoc}
    */
   @Override
-  synchronized public void checkServerTrusted(X509Certificate[] chain,
+  synchronized public void checkServerTrusted(@NonNull X509Certificate[] chain,
                                               String authType)
-                                                              throws CertificateException {
+    throws CertificateException {
     try {
       storeTrustManager.checkServerTrusted(chain, authType);
     }
@@ -114,7 +110,7 @@ public class MemorizingTrustManager implements X509TrustManager {
       catch (CertificateException e2) {
         if (options.trustOnFirstUse && !options.store.exists()) {
           try {
-            storeCert(chain);
+            memorizeCert(chain);
           }
           catch (Exception e3) {
             throw new CertificateMemorizationException(e3);
@@ -128,20 +124,50 @@ public class MemorizingTrustManager implements X509TrustManager {
   }
 
   /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * javax.net.ssl.X509TrustManager#getAcceptedIssuers()
+   * {@inheritDoc}
    */
   @Override
   public X509Certificate[] getAcceptedIssuers() {
     return(new X509Certificate[0]);
   }
 
+  /*
+   * {@inheritDoc}
+   */
+  @Override
+  synchronized public List<X509Certificate> checkServerTrusted(
+    @NonNull X509Certificate[] chain, String authType, String host)
+    throws CertificateException {
+    checkServerTrusted(chain, authType);
+
+    return(Arrays.asList(chain));
+  }
+
+  /*
+   * {@inheritDoc}
+   */
+  @Override
+  synchronized public boolean isUserAddedCertificate(X509Certificate cert) {
+    return(false);
+  }
+
   /**
-   * Memorizes a certificate, by storing it in the
-   * persistent key store.
-   * 
+   * If you catch an SSLHandshakeException when performing
+   * HTTPS I/O, and its getCause() is a
+   * CertificateNotMemorizedException, then you know that
+   * you configured certificate memorization using
+   * memorize(), and the SSL certificate for your request
+   * was not recognized.
+   *
+   * If the user agrees that your app should use the SSL
+   * certificate forever (or until you clear it), call
+   * this method, supplying the certificate chain you get
+   * by calling getCertificateChain() on the
+   * CertificateNotMemorizedException. Note that this will
+   * perform disk I/O and therefore should be done on a
+   * background thread. But, your network I/O is already being done
+   * on a background thread, right? Right?!?
+   *
    * @param chain
    *          user-approved certificate chain
    * @throws KeyStoreException
@@ -149,11 +175,9 @@ public class MemorizingTrustManager implements X509TrustManager {
    * @throws CertificateException
    * @throws IOException
    */
-  synchronized public void storeCert(X509Certificate[] chain)
-                                                             throws KeyStoreException,
-                                                             NoSuchAlgorithmException,
-                                                             CertificateException,
-                                                             IOException {
+  synchronized public void memorizeCert(@NonNull X509Certificate[] chain)
+    throws KeyStoreException, NoSuchAlgorithmException,
+    CertificateException, IOException {
     for (X509Certificate cert : chain) {
       String alias=cert.getSubjectDN().getName();
 
@@ -165,21 +189,35 @@ public class MemorizingTrustManager implements X509TrustManager {
     FileOutputStream fos=new FileOutputStream(options.store);
 
     keyStore.store(fos, options.storePassword.toCharArray());
+    fos.flush();
     fos.close();
   }
 
   /**
-   * Records a certificate chain in the transient key store,
-   * for use while this process is going on, but not saved
-   * between processes.
-   * 
+   * If you catch an SSLHandshakeException when performing
+   * HTTPS I/O, and its getCause() is a
+   * CertificateNotMemorizedException, then you know that
+   * you configured certificate memorization using
+   * memorize(), and the SSL certificate for your request
+   * was not recognized.
+   *
+   * If the user agrees that your app should use the SSL
+   * certificate for the lifetime of this process only, but
+   * not retain it beyond that, call this method,
+   * supplying the certificate chain you get by calling
+   * getCertificateChain() on the
+   * CertificateNotMemorizedException. Once your process is
+   * terminated, this cached certificate is lost, and you
+   * will get a CertificateNotMemorizedException again later
+   * on.
+   *
    * @param chain
+   *          user-approved certificate chain
    * @throws KeyStoreException
    * @throws NoSuchAlgorithmException
    */
-  synchronized public void allowOnce(X509Certificate[] chain)
-                                                             throws KeyStoreException,
-                                                             NoSuchAlgorithmException {
+  synchronized public void allowCertForProcess(@NonNull X509Certificate[] chain)
+    throws KeyStoreException, NoSuchAlgorithmException {
     for (X509Certificate cert : chain) {
       String alias=cert.getSubjectDN().getName();
 
@@ -190,9 +228,9 @@ public class MemorizingTrustManager implements X509TrustManager {
   }
 
   /**
-   * Clears the transient key store, and optionally clears
-   * the persistent key store (by deleting its file and
-   * re-initializing it).
+   * Clears the transient key store used by allowCertForProcess(),
+   * and optionally clears the persistent key store (by deleting
+   * its file and re-initializing it).
    * 
    * @param clearPersistent
    *          true to clear both key stores, false to clear
@@ -203,10 +241,8 @@ public class MemorizingTrustManager implements X509TrustManager {
    * @throws IOException
    */
   synchronized public void clear(boolean clearPersistent)
-                                                         throws KeyStoreException,
-                                                         NoSuchAlgorithmException,
-                                                         CertificateException,
-                                                         IOException {
+    throws KeyStoreException, NoSuchAlgorithmException,
+    CertificateException, IOException {
     if (clearPersistent) {
       options.store.delete();
     }
@@ -217,16 +253,13 @@ public class MemorizingTrustManager implements X509TrustManager {
   }
 
   private void initTransientStore() throws KeyStoreException,
-                                   NoSuchAlgorithmException,
-                                   CertificateException, IOException {
+    NoSuchAlgorithmException, CertificateException, IOException {
     transientKeyStore=KeyStore.getInstance(options.storeType);
     transientKeyStore.load(null, null);
   }
 
   private void initPersistentStore() throws KeyStoreException,
-                                    NoSuchAlgorithmException,
-                                    CertificateException,
-                                    FileNotFoundException, IOException {
+    NoSuchAlgorithmException, CertificateException, IOException {
     keyStore=KeyStore.getInstance(options.storeType);
 
     if (options.store.exists()) {
@@ -239,7 +272,7 @@ public class MemorizingTrustManager implements X509TrustManager {
   }
 
   private void initTrustManager() throws KeyStoreException,
-                                 NoSuchAlgorithmException {
+    NoSuchAlgorithmException {
     TrustManagerFactory tmf=TrustManagerFactory.getInstance("X509");
 
     tmf.init(keyStore);
@@ -270,11 +303,11 @@ public class MemorizingTrustManager implements X509TrustManager {
    * calls.
    */
   public static class Options {
-    File workingDir=null;
-    File store=null;
-    String storePassword;
-    String storeType=KeyStore.getDefaultType();
-    boolean trustOnFirstUse=false;
+    private File workingDir=null;
+    private File store=null;
+    private String storePassword;
+    private String storeType=KeyStore.getDefaultType();
+    private boolean trustOnFirstUse=false;
 
     /**
      * Constructor. Note that the Context is not held by the
@@ -317,9 +350,7 @@ public class MemorizingTrustManager implements X509TrustManager {
      * @return the options object for chained method calls
      */
     public Options trustOnFirstUse() {
-      trustOnFirstUse=true;
-
-      return(this);
+      return(trustOnFirstUse(true));
     }
 
     /**

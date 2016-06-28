@@ -1,12 +1,14 @@
 package com.commonsware.cwac.netseccfg.okhttp3.test;
 
 import android.support.test.runner.AndroidJUnit4;
+import com.commonsware.cwac.netseccfg.CertificateNotMemorizedException;
 import com.commonsware.cwac.netseccfg.OkHttp3Integrator;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import java.security.cert.CertificateException;
 import javax.net.ssl.SSLHandshakeException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -40,8 +42,16 @@ abstract public class AbstractOkHttp3Test {
       Assert.assertEquals(getExpectedResponse(), response.body().string());
     }
     catch (SSLHandshakeException e) {
-      if (isPositiveTest()) {
-        throw e;
+      if (e.getCause() instanceof CertificateNotMemorizedException) {
+        onNotMemorized((CertificateNotMemorizedException)e.getCause());
+
+        Response response=builder.build().newCall(request).execute();
+        Assert.assertEquals(getExpectedResponse(), response.body().string());
+      }
+      else {
+        if (isPositiveTest()) {
+          throw e;
+        }
       }
     }
     catch (RuntimeException e) {
@@ -58,5 +68,10 @@ abstract public class AbstractOkHttp3Test {
 
   protected boolean isPositiveTest() {
     return(true);
+  }
+
+  protected void onNotMemorized(CertificateNotMemorizedException e)
+    throws Exception {
+    throw e;
   }
 }
