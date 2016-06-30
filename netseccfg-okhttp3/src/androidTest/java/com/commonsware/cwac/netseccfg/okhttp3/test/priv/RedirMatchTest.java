@@ -9,7 +9,7 @@ import com.commonsware.cwac.netseccfg.okhttp3.test.pub.SimpleHTTPSTest;
 public class RedirMatchTest extends SimpleHTTPSTest {
   @Override
   protected String getUrl() {
-    return("http://"+BuildConfig.TEST_SERVER_HOST+":8080/test.json");
+    return(BuildConfig.TEST_PRIVATE_HTTP_REDIR_URL);
   }
 
   @Override

@@ -7,7 +7,7 @@ import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 public class SimpleHTTPTest extends AbstractHURLTest {
   @Override
   protected String getUrl() {
-    return("http://"+BuildConfig.TEST_SERVER_HOST+"/test.json");
+    return(BuildConfig.TEST_PRIVATE_HTTP_URL);
   }
 
   @Override

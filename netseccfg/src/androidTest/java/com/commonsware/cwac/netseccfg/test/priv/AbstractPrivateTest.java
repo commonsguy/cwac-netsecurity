@@ -6,6 +6,6 @@ import com.commonsware.cwac.netseccfg.test.AbstractHURLTest;
 abstract public class AbstractPrivateTest extends AbstractHURLTest {
   @Override
   protected String getUrl() {
-    return("https://"+BuildConfig.TEST_SERVER_HOST+"/test.json");
+    return(BuildConfig.TEST_PRIVATE_HTTPS_URL);
   }
 }
