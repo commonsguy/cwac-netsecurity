@@ -36,6 +36,9 @@ import javax.net.ssl.X509TrustManager;
  * Implementation of a memorizing trust manager, inspired by
  * https://github.com/ge0rg/MemorizingTrustManager, but
  * designed to be used by TrustManagerBuilder.
+ *
+ * Still a work in progress, as this really needs domain-specific
+ * stores.
  */
 public class MemorizingTrustManager implements X509Extensions {
   private KeyStore keyStore=null;
@@ -78,17 +81,7 @@ public class MemorizingTrustManager implements X509Extensions {
         transientTrustManager.checkClientTrusted(chain, authType);
       }
       catch (CertificateException e2) {
-        if (options.trustOnFirstUse && !options.store.exists()) {
-          try {
-            memorizeCert(chain);
-          }
-          catch (Exception e3) {
-            throw new CertificateMemorizationException(e3);
-          }
-        }
-        else {
-          throw new CertificateNotMemorizedException(chain);
-        }
+        throw new CertificateNotMemorizedException(chain);
       }
     }
   }
@@ -108,17 +101,7 @@ public class MemorizingTrustManager implements X509Extensions {
         transientTrustManager.checkServerTrusted(chain, authType);
       }
       catch (CertificateException e2) {
-        if (options.trustOnFirstUse && !options.store.exists()) {
-          try {
-            memorizeCert(chain);
-          }
-          catch (Exception e3) {
-            throw new CertificateMemorizationException(e3);
-          }
-        }
-        else {
-          throw new CertificateNotMemorizedException(chain);
-        }
+        throw new CertificateNotMemorizedException(chain);
       }
     }
   }
@@ -307,7 +290,6 @@ public class MemorizingTrustManager implements X509Extensions {
     private File store=null;
     private String storePassword;
     private String storeType=KeyStore.getDefaultType();
-    private boolean trustOnFirstUse=false;
 
     /**
      * Constructor. Note that the Context is not held by the
@@ -332,49 +314,6 @@ public class MemorizingTrustManager implements X509Extensions {
       store=new File(workingDir, "memorized.bks");
 
       this.storePassword=storePassword;
-    }
-
-    /**
-     * Call this to enable "trust on first use" logic. The
-     * first SSL certificate that is seen by the trust
-     * manager will automatically be accepted and saved. For
-     * cases where this trust manager will only be used for
-     * one site, this eliminates the need to prompt the user
-     * to validate the certificate. It *does* assume that
-     * the first SSL certificate is valid, though if it is
-     * not (e.g., the user was a victim of a MITM attack at
-     * that point), future work should result in seeing the
-     * real certificate and (hopefully) triggering work to
-     * realize that something is wrong.
-     * 
-     * @return the options object for chained method calls
-     */
-    public Options trustOnFirstUse() {
-      return(trustOnFirstUse(true));
-    }
-
-    /**
-     * Call this to enable "trust on first use" logic. The
-     * first SSL certificate that is seen by the trust
-     * manager will automatically be accepted and saved. For
-     * cases where this trust manager will only be used for
-     * one site, this eliminates the need to prompt the user
-     * to validate the certificate. It *does* assume that
-     * the first SSL certificate is valid, though if it is
-     * not (e.g., the user was a victim of a MITM attack at
-     * that point), future work should result in seeing the
-     * real certificate and (hopefully) triggering work to
-     * realize that something is wrong.
-     * 
-     * @param trust
-     *          true if should trust on first use, false
-     *          otherwise
-     * @return the options object for chained method calls
-     */
-    public Options trustOnFirstUse(boolean trust) {
-      trustOnFirstUse=trust;
-
-      return(this);
     }
   }
 }
