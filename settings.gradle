@@ -1,1 +1,1 @@
-include ':netseccfg', ':netseccfg-okhttp3'
+include ':netseccfg', ':netseccfg-okhttp3', ':demo'
