@@ -1,6 +1,8 @@
 package com.commonsware.cwac.netseccfg.test;
 
+import android.hardware.Camera;
 import android.support.test.runner.AndroidJUnit4;
+import com.commonsware.cwac.netseccfg.CertChainListener;
 import com.commonsware.cwac.netseccfg.TrustManagerBuilder;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
@@ -14,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
@@ -24,17 +27,27 @@ abstract public class AbstractHURLTest {
   abstract protected String getUrl();
   abstract protected TrustManagerBuilder getBuilder()
     throws Exception;
+  private boolean receivedChain=false;
 
   @Test
   public void testRequest() throws Exception {
     HttpURLConnection c=
       (HttpURLConnection)new URL(getUrl()).openConnection();
+    boolean hasBuilder=false;
 
     if (c instanceof HttpsURLConnection) {
       TrustManagerBuilder builder=getBuilder();
 
       if (builder!=null) {
-        builder.applyTo(c);
+        hasBuilder=true;
+
+        builder.withCertChainListener(new CertChainListener() {
+          @Override
+          public void onChain(X509Certificate[] chain,
+                              String domain) {
+            receivedChain=true;
+          }
+        }).applyTo(c);
       }
     }
 
@@ -47,6 +60,10 @@ abstract public class AbstractHURLTest {
         }
 
         Assert.assertEquals(getExpectedResponse(), slurp(in));
+
+        if (hasBuilder) {
+          Assert.assertTrue("Received chain", receivedChain);
+        }
       }
       finally {
         in.close();

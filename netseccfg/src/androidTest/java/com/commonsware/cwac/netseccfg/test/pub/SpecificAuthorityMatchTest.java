@@ -7,8 +7,8 @@ import com.commonsware.cwac.netseccfg.test.R;
 public class SpecificAuthorityMatchTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
-    return(new TrustManagerBuilder().withConfig(
-      InstrumentationRegistry.getContext(), R.xml.thawte, false));
+    return(new TrustManagerBuilder()
+      .withConfig(InstrumentationRegistry.getContext(), R.xml.thawte, false));
   }
 
   @Override
