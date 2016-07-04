@@ -1,5 +1,5 @@
 /***
-  Copyright (c) 2014 CommonsWare, LLC
+  Copyright (c) 2014-2016 CommonsWare, LLC
   
   Licensed under the Apache License, Version 2.0 (the "License"); you may
   not use this file except in compliance with the License. You may obtain
@@ -207,6 +207,20 @@ public class TrustManagerBuilder {
     appConfig=new ApplicationConfig(config);
 
     return(add(appConfig.getTrustManager()));
+  }
+
+  public TrustManagerBuilder withCertChainListener(CertChainListener listener) {
+    mgr.addCertChainListener(listener);
+
+    return(this);
+  }
+
+  public void removeCertChainListener(CertChainListener listener) {
+    mgr.removeCertChainListener(listener);
+  }
+
+  public boolean hasCertChainListeners() {
+    return(mgr.hasCertChainListeners());
   }
 
   public boolean isCleartextTrafficPermitted() {

@@ -1,6 +1,6 @@
 /***
-  Copyright (c) 2014 CommonsWare, LLC
-  
+  Copyright (c) 2014-2016 CommonsWare, LLC
+
   Licensed under the Apache License, Version 2.0 (the "License"); you may
   not use this file except in compliance with the License. You may obtain
   a copy of the License at
@@ -14,21 +14,19 @@
 
 package com.commonsware.cwac.netseccfg;
 
-import android.net.http.X509TrustManagerExtensions;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
 public class CompositeTrustManager implements X509Extensions {
   private ArrayList<X509Extensions> managers=new ArrayList<>();
   private boolean matchAll;
   private String host;
+  private ArrayList<CertChainListener> certChainListeners=
+    new ArrayList<>();
 
   public static CompositeTrustManager matchAll(X509TrustManager... managers) {
     return(new CompositeTrustManager(managers, true));
@@ -47,8 +45,20 @@ public class CompositeTrustManager implements X509Extensions {
     setMatchAll(matchAll);
   }
 
-  void setHost(String host) {
+  public void setHost(String host) {
     this.host=host;
+  }
+
+  public void addCertChainListener(CertChainListener listener) {
+    certChainListeners.add(listener);
+  }
+
+  public void removeCertChainListener(CertChainListener listener) {
+    certChainListeners.remove(listener);
+  }
+
+  public boolean hasCertChainListeners() {
+    return(certChainListeners.size()>0);
   }
 
   public void add(X509TrustManager mgr) {
@@ -82,14 +92,12 @@ public class CompositeTrustManager implements X509Extensions {
     return(managers.size());
   }
 
-  X509TrustManager getFirst() {
-    return(managers.get(0));
-  }
-
   @Override
   public void checkClientTrusted(X509Certificate[] chain,
                                  String authType)
     throws CertificateException {
+    passChainToListeners(chain);
+
     CertificateException first=null;
 
     for (X509TrustManager mgr : managers) {
@@ -119,6 +127,8 @@ public class CompositeTrustManager implements X509Extensions {
   public void checkServerTrusted(X509Certificate[] chain,
                                  String authType)
     throws CertificateException {
+    passChainToListeners(chain);
+
     CertificateException first=null;
     boolean anyGoodResults=false;
 
@@ -152,6 +162,8 @@ public class CompositeTrustManager implements X509Extensions {
                                                   String authType,
                                                   String hostname)
     throws CertificateException {
+    passChainToListeners(certs, hostname);
+
     CertificateException first=null;
     boolean anyGoodResults=false;
     List<X509Certificate> result=null;
@@ -207,5 +219,16 @@ public class CompositeTrustManager implements X509Extensions {
     }
 
     return(issuers.toArray(new X509Certificate[issuers.size()]));
+  }
+
+  private void passChainToListeners(X509Certificate[] chain) {
+    passChainToListeners(chain, host);
+  }
+
+  private void passChainToListeners(X509Certificate[] chain,
+                                    String hostname) {
+    for (CertChainListener listener : certChainListeners) {
+      listener.onChain(chain, hostname);
+    }
   }
 }
