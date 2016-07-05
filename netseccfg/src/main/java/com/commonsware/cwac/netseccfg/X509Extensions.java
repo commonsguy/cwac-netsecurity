@@ -16,10 +16,33 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import javax.net.ssl.X509TrustManager;
 
+/**
+ * android.net.http.X509TrustManagerExtensions defines two additional
+ * methods that modern Android X509TrustManager implementations should
+ * implement. However, while X509TrustManagerExtensions was written
+ * as a wrapper, X509TrustManagerExtensions is just a plain class,
+ * not an extension of X509TrustManager.
+ *
+ * This is stupid.
+ *
+ * So, this interface does what should have been done originally,
+ * defining an extended interface for those additional methods.
+ */
 public interface X509Extensions extends X509TrustManager {
+  /**
+   * Verifies the given certificate chain.
+   *
+   * See android.net.http.X509TrustManagerExtensions for details.
+   */
   List<X509Certificate> checkServerTrusted(X509Certificate[] chain,
                                            String authType,
                                            String host)
     throws CertificateException;
+
+  /**
+   * Checks whether a CA certificate is added by an user.
+   *
+   * See android.net.http.X509TrustManagerExtensions for details.
+   */
   boolean isUserAddedCertificate (X509Certificate cert);
 }

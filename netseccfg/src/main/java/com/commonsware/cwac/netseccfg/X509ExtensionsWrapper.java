@@ -18,6 +18,11 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import javax.net.ssl.X509TrustManager;
 
+/**
+ * Wrapper for an X509TrustManager, to try to access the
+ * X509Extensions methods via reflection, while also honoring
+ * the X509TrustManager contract.
+ */
 public class X509ExtensionsWrapper implements X509Extensions {
   private static final String ERROR_CONTRACT=
     "Supplied X509TrustManager does not implement X509Extensions contract";
@@ -25,6 +30,13 @@ public class X509ExtensionsWrapper implements X509Extensions {
   private final Method checkServerTrustedMethod;
   private Method isUserAddedCertificateMethod;
 
+  /**
+   * Standard constructor. Fails if the X509TrustManager does not
+   * implement the three-parameter checkServerTrusted() method.
+   *
+   * @param tm X509TrustManager to wrap
+   * @throws IllegalArgumentException
+   */
   public X509ExtensionsWrapper(X509TrustManager tm) throws IllegalArgumentException {
     this.tm=tm;
 
@@ -52,6 +64,9 @@ public class X509ExtensionsWrapper implements X509Extensions {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   @Override
   public List<X509Certificate> checkServerTrusted(X509Certificate[] chain,
@@ -78,6 +93,9 @@ public class X509ExtensionsWrapper implements X509Extensions {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isUserAddedCertificate(X509Certificate cert) {
     if (isUserAddedCertificateMethod==null) {
@@ -101,6 +119,9 @@ public class X509ExtensionsWrapper implements X509Extensions {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void checkClientTrusted(X509Certificate[] x509Certificates,
                                  String s)
@@ -108,6 +129,9 @@ public class X509ExtensionsWrapper implements X509Extensions {
     tm.checkClientTrusted(x509Certificates, s);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void checkServerTrusted(X509Certificate[] x509Certificates,
                                  String s)
@@ -115,6 +139,9 @@ public class X509ExtensionsWrapper implements X509Extensions {
     tm.checkServerTrusted(x509Certificates, s);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public X509Certificate[] getAcceptedIssuers() {
     return(tm.getAcceptedIssuers());

@@ -13,6 +13,17 @@ package com.commonsware.cwac.netseccfg;
 
 import java.security.cert.X509Certificate;
 
+/**
+ * A listener interface to use with TrustManagerBuilder to be handed
+ * a copy of each certificate chain validated by the trust manager.
+ */
 public interface CertChainListener {
+  /**
+   * Called before validating each certificate chain
+   *
+   * @param chain the certificate chain
+   * @param domain the domain name the chain applies to, or null if
+   *               this is not known
+   */
   void onChain(X509Certificate[] chain, String domain);
 }

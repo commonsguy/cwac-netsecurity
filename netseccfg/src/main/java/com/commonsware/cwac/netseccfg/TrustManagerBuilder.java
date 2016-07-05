@@ -35,7 +35,7 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * Class for building TrustManager instances for use with
- * HttpsURLConnection, OkHTTP, and kin.
+ * HttpsURLConnection, OkHttp3, and kin.
  * 
  * This class has a builder-style fluent interface. Create
  * an instance, and you can call various methods on it,
@@ -46,7 +46,13 @@ import javax.net.ssl.X509TrustManager;
  * create a single TrustManager representing what you want)
  * or buildArray() (a convenience method to wrap that single
  * TrustManager in a TrustManager[], which many APIs
- * require).
+ * require). Or, if you are using HttpURLConnection, call
+ * applyTo() to apply the contents of the builder to that
+ * connection.
+ *
+ * If you are using OkHttp3, use the netseccfg-okhttp3 artifact.
+ * In there, OkHttp3Integrator has an applyTo() method that
+ * attaches a TrustManagerBuilder to an OkHttpClient.Builder.
  */
 public class TrustManagerBuilder {
   private CompositeTrustManager mgr=CompositeTrustManager.matchAll();
@@ -68,6 +74,17 @@ public class TrustManagerBuilder {
     return(new X509TrustManager[] { build() });
   }
 
+  /**
+   * Configures the supplied HttpURLConnection to use the trust
+   * manager configured via this builder. This will only be done
+   * if the connection really is an HttpsURLConnection (a subclass
+   * of HttpURLConnection).
+   *
+   * @param c the connection to configure
+   * @return the connection passed in, for chaining
+   * @throws NoSuchAlgorithmException
+   * @throws KeyManagementException
+   */
   public HttpURLConnection applyTo(HttpURLConnection c)
     throws NoSuchAlgorithmException, KeyManagementException {
     if (c instanceof HttpsURLConnection && mgr.size()>0) {
@@ -183,11 +200,29 @@ public class TrustManagerBuilder {
     return(this);
   }
 
+  /**
+   * Use the network security configuration identified by the supplied
+   * XML resource ID.
+   *
+   * @param ctxt any Context will work
+   * @param resourceId an R.xml value pointing to the configuration
+   * @return the builder for chained calls
+   */
   public TrustManagerBuilder withConfig(@NonNull Context ctxt,
                                         @XmlRes int resourceId) {
     return(withConfig(new XmlConfigSource(ctxt, resourceId, false)));
   }
 
+  /**
+   * Use the network security configuration identified by the supplied
+   * XML resource ID.
+   *
+   * @param ctxt any Context will work
+   * @param resourceId an R.xml value pointing to the configuration
+   * @param isDebugBuild true if this should be treated as a debug
+   *                     build, false otherwise
+   * @return the builder for chained calls
+   */
   public TrustManagerBuilder withConfig(@NonNull Context ctxt,
                                         @XmlRes int resourceId,
                                         boolean isDebugBuild) {
@@ -195,6 +230,13 @@ public class TrustManagerBuilder {
       isDebugBuild)));
   }
 
+  /**
+   * Use the network security configuration identified configured
+   * in the app's manifest.
+   *
+   * @param ctxt any Context will work
+   * @return the builder for chained calls
+   */
   public TrustManagerBuilder withManifestConfig(@NonNull Context ctxt) {
     if (Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
       return(withConfig(new ManifestConfigSource(ctxt)));
@@ -209,20 +251,25 @@ public class TrustManagerBuilder {
     return(add(appConfig.getTrustManager()));
   }
 
+  /**
+   * Add a listener to be handed all certificate chains. Use this
+   * solely for diagnostic purposes (e.g., to understand what
+   * root CA to add to a network security configuration). Do not use
+   * this in production code.
+   *
+   * @param listener a listener to be notified of certificate chains
+   * @return the builder for chained calls
+   */
   public TrustManagerBuilder withCertChainListener(CertChainListener listener) {
     mgr.addCertChainListener(listener);
 
     return(this);
   }
 
-  public void removeCertChainListener(CertChainListener listener) {
-    mgr.removeCertChainListener(listener);
-  }
-
-  public boolean hasCertChainListeners() {
-    return(mgr.hasCertChainListeners());
-  }
-
+  /**
+   * @return true if the network security configuration allows
+   * cleartext traffic, false otherwise
+   */
   public boolean isCleartextTrafficPermitted() {
     if (appConfig==null) {
       return(true);
@@ -231,6 +278,11 @@ public class TrustManagerBuilder {
     return(appConfig.isCleartextTrafficPermitted());
   }
 
+  /**
+   * @param hostname the domain name to check for cleartext availability
+   * @return true if the network security configuration allows
+   * cleartext traffic for this domain name, false otherwise
+   */
   public boolean isCleartextTrafficPermitted(String hostname) {
     if (appConfig==null) {
       return(true);

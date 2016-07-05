@@ -18,7 +18,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+/**
+ * X509TrustManager that rejects everything. Useful for testing.
+ * Not so useful anywhere else.
+ */
 public class DenyAllTrustManager implements X509Extensions {
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void checkClientTrusted(X509Certificate[] chain,
                                  String authType)
@@ -26,6 +33,9 @@ public class DenyAllTrustManager implements X509Extensions {
     throw new CertificateException();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void checkServerTrusted(X509Certificate[] chain,
                                  String authType)
@@ -33,11 +43,17 @@ public class DenyAllTrustManager implements X509Extensions {
     throw new CertificateException();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public X509Certificate[] getAcceptedIssuers() {
     return(new X509Certificate[0]);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<X509Certificate> checkServerTrusted(
     X509Certificate[] chain, String authType, String host)
@@ -45,6 +61,9 @@ public class DenyAllTrustManager implements X509Extensions {
     throw new CertificateException();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isUserAddedCertificate(X509Certificate cert) {
     return(false);
