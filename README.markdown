@@ -46,9 +46,108 @@ dependencies {
 }
 ```
 
-## Usage
+## Basic Usage
 
-TBD
+Start by following
+[Google's documentation for the Android 7.0 network security configuration](https://developer.android.com/preview/features/security-config.html).
+Ideally, confirm that your configuration works using an Android 7.0+
+device.
+
+Next, add in this `<meta-data>` element to your manifest, as a child
+of the `<application>` element:
+
+```xml
+<meta-data
+  android:name="android.security.net.config"
+  android:resource="@xml/net_security_config" />
+```
+
+The value for `android:resource` should be the same XML resource that
+you used in the `android:networkSecurityConfig` attribute in the
+`<application>` element.
+
+Then, in your code where you want to set up your network communications,
+create a `TrustManagerBuilder` and teach it to load the configuration
+from the manifest:
+
+```java
+TrustManagerBuilder tmb=
+  new TrustManagerBuilder().withManifestConfig(ctxt);
+```
+
+(where `ctxt` is some `Context`)
+
+If you are using OkHttp3, create your basic `OkHttpClient.Builder`,
+then call:
+
+```java
+OkHttp3Integrator.applyTo(tmb, okb);
+```
+
+(where `tmb` is the `TrustManagerBuilder` from before, and `okb`
+is your `OkHttpClient.Builder`)
+
+At this point, you can create your `OkHttpClient` from the `Builder`
+and start using it.
+
+If you are using `HttpURLConnection`, you can call `applyTo()` on
+the `TrustManagerBuilder` itself, passing in the `HttpURLConnection`.
+Afterwards, you can start using the `HttpURLConnection` to make your
+HTTP request.
+
+## Basic Limitations
+
+If you use `HttpURLConnection`, you cannot use `<domain-config>`
+elements in the network security configuration XML. Similarly,
+you cannot use `cleartextTrafficPermitted` with `HttpURLConnection`.
+If you have them in the XML, they will be ignored.
+
+OkHttp3 should support the full range of network security configuration
+XML features.
+
+## Advanced Usage
+
+TBD pointer to external docs
+
+## Compiling from Source and Running the Test Suites
+
+Both `netsecurity` and `netsecurity-okhttp3` have instrumentation
+tests in their respective `androidTest/` sourcesets. Each has those
+tests subdivided into two groups: `pub` and `priv`.
+
+The `pub` tests hit publicly-available Web servers (mostly those
+hosted by CommonsWare). As such, you should be able to run those
+tests without issue.
+
+The `priv` tests need additional configuration on your part. That
+configuration is designed to be held in a `gradle.properties`
+file that you need to add to your root directory of your copy
+of the project code. Specifically, three values should reside there:
+
+- `TEST_PRIVATE_HTTP_URL`: a URL to some Web server that you control
+- `TEST_PRIVATE_HTTPS_URL`: a URL to some Web server that you control, where the communications are secured via SSL using a self-signed certificate
+- `TEST_PRIVATE_HTTP_REDIR_URL`: a URL to some Web server that you control that, when requested, issues a server-side redirect to an SSL-secured page (such as the one from `TEST_PRIVATE_HTTPS_URL`)
+
+The first two URLs should each return:
+
+```json
+{"Hello": "world"}
+```
+
+You will need to define those values in your `gradle.properties` file
+even if you are just planning on modifying the code, as otherwise
+the `build.gradle` files for the library modules will fail, as they expect
+those values.
+
+In addition, if you wish to run the `priv` tests, you will need to
+replace the `androidTest/res/raw/selfsigned.crt` file in each library
+module with the CRT file that matches your self-signed certificate that
+`TEST_PRIVATE_HTTPS_URL` uses.
+
+## JavaDocs
+
+- [`netsecurity`](http://javadocs.commonsware.com/cwac/netsecurity/index.html)
+- [`netsecurity-okhttp3`](http://javadocs.commonsware.com/cwac/netsecurity-okhttp3/index.html)
 
 ## Dependencies
 
