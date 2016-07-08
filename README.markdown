@@ -107,7 +107,10 @@ XML features.
 
 ## Advanced Usage
 
-TBD pointer to external docs
+If you want to do more sophisticated things with the network security
+configuration backport and/or `TrustManagerBuilder`, there is a
+[separate page of documentation](./blob/master/docs/ADVANCED_USAGE.markdown)
+for that.
 
 ## Compiling from Source and Running the Test Suites
 
