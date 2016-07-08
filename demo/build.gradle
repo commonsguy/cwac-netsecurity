@@ -5,7 +5,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile project(':netseccfg-okhttp3')
+    compile project(':netsecurity-okhttp3')
 }
 
 android {
