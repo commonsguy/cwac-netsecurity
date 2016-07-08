@@ -109,7 +109,7 @@ XML features.
 
 If you want to do more sophisticated things with the network security
 configuration backport and/or `TrustManagerBuilder`, there is a
-[separate page of documentation](./blob/master/docs/ADVANCED_USAGE.markdown)
+[separate page of documentation](https://github.com/commonsguy/cwac-netsecurity/blob/master/docs/ADVANCED_USAGE.markdown)
 for that.
 
 ## Compiling from Source and Running the Test Suites
