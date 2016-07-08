@@ -95,6 +95,11 @@ the `TrustManagerBuilder` itself, passing in the `HttpURLConnection`.
 Afterwards, you can start using the `HttpURLConnection` to make your
 HTTP request.
 
+In either case, on Android 7.0+ devices, `withManifestConfig()` will
+*not* use the backport. Instead, the platform-native implementation
+of the network security configuration subsystem will be used. On
+Android 4.2-6.0 devices, the backport will be used.
+
 ## Basic Limitations
 
 If you use `HttpURLConnection`, you cannot use `<domain-config>`
