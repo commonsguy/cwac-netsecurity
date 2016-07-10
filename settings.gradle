@@ -1,1 +1,1 @@
-include ':netsecurity', ':netsecurity-okhttp3', ':demo'
+include ':netsecurity', ':demo'

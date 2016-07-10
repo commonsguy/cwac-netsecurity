@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="app_name">CWAC NetSecCfg Demo</string>
+	<string name="app_name">CWAC NetSecurity Demo</string>
 	<string name="icon">Owner Icon</string>
 
 </resources>
