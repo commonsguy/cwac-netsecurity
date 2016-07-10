@@ -16,8 +16,9 @@ and `HttpURLConnection`.
 
 ## Installation
 
-The artifacts for this library are distributed via the CWAC repository,
-so you will need to configure that in your module's `build.gradle` file:
+The artifact for this library is distributed via the CWAC repository,
+so you will need to configure that in your module's `build.gradle` file,
+along with your `compile` statement:
 
 ```groovy
 repositories {
@@ -25,26 +26,19 @@ repositories {
         url "https://s3.amazonaws.com/repo.commonsware.com"
     }
 }
-```
 
-If you are using this library with OkHttp3, you will want to integrate
-the `netsecurity-okhttp3` dependency:
-
-```groovy
-dependencies {
-    compile 'com.commonsware.cwac:netsecurity-okhttp3:0.0.1'
-}
-```
-
-If you are using `HttpURLConnection`, or tying this code into some
-other HTTP client stack, use the `netsecurity` dependency (which
-`netsecurity-okhttp3` pulls in by reference):
-
-```groovy
 dependencies {
     compile 'com.commonsware.cwac:netsecurity:0.0.1'
+    compile 'com.squareup.okhttp3:okhttp:3.4.0'
 }
 ```
+
+If you are using this library with OkHttp3, you also need to have
+a `compile` statement for a compatible OkHttp3 artifact, as shown
+above.
+
+If you are using `HttpURLConnection`, or tying this code into some
+other HTTP client stack, you can skip the OkHttp3 dependency.
 
 ## Basic Usage
 
@@ -100,6 +94,8 @@ In either case, on Android 7.0+ devices, `withManifestConfig()` will
 of the network security configuration subsystem will be used. On
 Android 4.2-6.0 devices, the backport will be used.
 
+[JavaDocs for the library are available](http://javadocs.commonsware.com/cwac/netsecurity/index.html).
+
 ## Basic Limitations
 
 If you use `HttpURLConnection`, you cannot use `<domain-config>`
@@ -119,9 +115,8 @@ for that.
 
 ## Compiling from Source and Running the Test Suites
 
-Both `netsecurity` and `netsecurity-okhttp3` have instrumentation
-tests in their respective `androidTest/` sourcesets. Each has those
-tests subdivided into two groups: `pub` and `priv`.
+The instrumentation tests in `androidTest/` are subdivided into two
+groups: `pub` and `priv`.
 
 The `pub` tests hit publicly-available Web servers (mostly those
 hosted by CommonsWare). As such, you should be able to run those
@@ -152,15 +147,11 @@ replace the `androidTest/res/raw/selfsigned.crt` file in each library
 module with the CRT file that matches your self-signed certificate that
 `TEST_PRIVATE_HTTPS_URL` uses.
 
-## JavaDocs
-
-- [`netsecurity`](http://javadocs.commonsware.com/cwac/netsecurity/index.html)
-- [`netsecurity-okhttp3`](http://javadocs.commonsware.com/cwac/netsecurity-okhttp3/index.html)
-
 ## Dependencies
 
-Not surprisingly, `netsecurity-okhttp3` depends upon OkHttp3. This library
-should fairly closely track the latest OkHttp3 release. If you find
+`netsecurity` has a `provided` dependency on OkHttp3. This library
+should fairly closely track the latest OkHttp3 release, presently
+**3.4.0**. If you find
 that the library has fallen behind, please
 [file an issue](https://github.com/commonsguy/cwac-netsecurity/issues)
 if one has not already been filed.
@@ -174,7 +165,8 @@ Otherwise, there are no external dependencies.
 The current version is **0.0.1**.
 
 Right now, before Android 7.0 ships, version numbers have limited basis
-in reality. Once Android 7.0 ships, though, the version numbers will
+in reality. Once Android 7.0 ships and its source code is
+released, though, the version numbers will
 reflect the AOSP code that the backport is based upon:
 
 - Major version = API level of the AOSP code (e.g., 24)
@@ -186,7 +178,7 @@ reflect the AOSP code that the backport is based upon:
 The `demo/` module is an Android app that uses OkHttp3, Retrofit,
 and Picasso to show the latest Android questions on Stack Overflow
 in a `ListView`. Retrofit and Picasso use a common OkHttp3-defined
-`OkHttpClient` object, and that client uses `netcipher-okhttp3` to
+`OkHttpClient` object, and that client uses `netcipher` to
 ensure that connections to key hosts, such as the Stack Exchange
 Web service API, use SSL certificates from the expected certificate
 authorities.

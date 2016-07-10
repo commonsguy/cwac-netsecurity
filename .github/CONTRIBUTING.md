@@ -12,6 +12,13 @@ Most likely the most common contribution to a library like this will be bug repo
 - the code necessary to reproduce the problem (this could be the repo's demo app, or it could be some demo project of yours that you publish)
 - the steps necessary, using that code and that version of Android, to reproduce the problem
 
+Also, bear in mind that much of the code in this library is a backport
+of code from the Android Open Source Project. Please try reproducing
+your problem on an Android 7.0+ device using the native network
+security configuration implementation. If the problem persists, then
+the problem is with the AOSP code. That code can be patched here,
+but it needs to be fixed upstream as well.
+
 ## Contributing Feature Requests
 
 If you have an idea for how to make the library better, feel free to file an [issue](https://github.com/commonsguy/cwac-cam2/issues).
