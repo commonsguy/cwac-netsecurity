@@ -178,7 +178,7 @@ reflect the AOSP code that the backport is based upon:
 The `demo/` module is an Android app that uses OkHttp3, Retrofit,
 and Picasso to show the latest Android questions on Stack Overflow
 in a `ListView`. Retrofit and Picasso use a common OkHttp3-defined
-`OkHttpClient` object, and that client uses `netcipher` to
+`OkHttpClient` object, and that client uses `netsecurity` to
 ensure that connections to key hosts, such as the Stack Exchange
 Web service API, use SSL certificates from the expected certificate
 authorities.
