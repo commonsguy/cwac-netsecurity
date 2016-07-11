@@ -14,6 +14,11 @@ configuration backport, particularly for
 [OkHttp3](https://github.com/square/okhttp)
 and `HttpURLConnection`.
 
+**NOTE**: If Google releases their own backport of network security
+configuration, please consider using it. Official backports are usually
+stronger candidates than are unofficial ones like the one contained
+in this library.
+
 ## Installation
 
 The artifact for this library is distributed via the CWAC repository,
@@ -164,15 +169,6 @@ Otherwise, there are no external dependencies.
 
 The current version is **0.0.1**.
 
-Right now, before Android 7.0 ships, version numbers have limited basis
-in reality. Once Android 7.0 ships and its source code is
-released, though, the version numbers will
-reflect the AOSP code that the backport is based upon:
-
-- Major version = API level of the AOSP code (e.g., 24)
-- Minor version = Compatibility-breaking changes, due to AOSP code changes or changes to the library's own code (e.g., `TrustManagerBuilder`)
-- Patch version = General bug fixes that should not require changes to apps using the library
-
 ## Demo
 
 The `demo/` module is an Android app that uses OkHttp3, Retrofit,
@@ -205,6 +201,8 @@ post an [issue](./issues).
 
 Do not ask for help via social media.
 
-## Release Notes
+## AOSP Version Tracking and Release Notes
 
-- v0.0.1: initial release
+|Library Version|AOSP Code Base       |Release Notes|
+|:-------------:|:-------------------:|-------------|
+|v0.0.1         |`android-n-preview-4`|initial release|

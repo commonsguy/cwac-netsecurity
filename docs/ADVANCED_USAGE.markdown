@@ -2,7 +2,7 @@
 
 If [the basics](https://github.com/commonsguy/cwac-netsecurity#basic-usage)
 are too basic, here are some other things that you can do using
-`netsecurity` and `netsecurity-okhttp3`.
+`netsecurity`.
 
 ## Using Alternative Network Security Configuration XML
 
@@ -49,7 +49,7 @@ HTTP client.
 
 If you want to integrate `TrustManagerBuilder` and the network security
 configuration backport with some other HTTP client API, start by reviewing
-the `OkHttp3Integrator` class in the `netsecurity-okhttp3` library.
+the `OkHttp3Integrator` class in the `netsecurity` library.
 This will give you an idea of what is required and how easy it will
 be to replicate this class for your particular HTTP client API.
 
