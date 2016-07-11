@@ -203,6 +203,6 @@ Do not ask for help via social media.
 
 ## AOSP Version Tracking and Release Notes
 
-|Library Version|AOSP Code Base       |Release Notes|
-|:-------------:|:-------------------:|-------------|
-|v0.0.1         |`android-n-preview-4`|initial release|
+|Library Version|AOSP Code Base                                                                                          |Release Notes|
+|:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.0.1         |[`android-n-preview-4`](https://android.googlesource.com/platform/frameworks/base/+/android-n-preview-4)|initial release|
