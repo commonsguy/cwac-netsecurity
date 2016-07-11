@@ -196,7 +196,7 @@ and stack traces if you are encountering crashes.
 
 If you have encountered what is clearly a bug, or if you have a feature request,
 please read [the contribution guidelines](.github/CONTRIBUTING.md), then
-post an [issue](./issues).
+post an [issue](https://github.com/commonsguy/cwac-netsecurity/issues).
 **Be certain to include complete steps for reproducing the issue.**
 
 Do not ask for help via social media.
