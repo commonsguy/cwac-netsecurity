@@ -11,19 +11,19 @@
 
 package com.commonsware.cwac.netsecurity.test.pub.okhttp3;
 
+import android.support.test.InstrumentationRegistry;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
+import com.commonsware.cwac.netsecurity.test.R;
 
-public class DefaultAndDenyTest extends SimpleHTTPSTest {
+public class OrAndTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
     return(new TrustManagerBuilder()
-      .useDefault()
-      .useDefault()
+      .withConfig(InstrumentationRegistry.getContext(),
+        R.xml.okhttp3_selfsigned_mismatch, false)
       .or()
       .useDefault()
-      .useDefault()
       .and()
-      .denyAll()
       .denyAll());
   }
 

@@ -13,18 +13,10 @@ package com.commonsware.cwac.netsecurity.test.pub.okhttp3;
 
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
 
-public class DefaultAndDenyTest extends SimpleHTTPSTest {
+public class DefaultAndDefaultAndDenyTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
-    return(new TrustManagerBuilder()
-      .useDefault()
-      .useDefault()
-      .or()
-      .useDefault()
-      .useDefault()
-      .and()
-      .denyAll()
-      .denyAll());
+    return(new TrustManagerBuilder().useDefault().and().denyAll());
   }
 
   @Override
