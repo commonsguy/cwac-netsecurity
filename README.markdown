@@ -189,7 +189,7 @@ the Android Open Source Project and CommonsWare, LLC.
 ## Questions
 
 If you have questions regarding the use of this code, please post a question
-on [StackOverflow](http://stackoverflow.com/questions/ask) tagged with
+on [Stack Overflow](http://stackoverflow.com/questions/ask) tagged with
 `commonsware-cwac` and `android` after [searching to see if there already is an answer](https://stackoverflow.com/search?q=[commonsware-cwac]+camera). Be sure to indicate
 what CWAC module you are having issues with, and be sure to include source code 
 and stack traces if you are encountering crashes.
@@ -199,7 +199,8 @@ please read [the contribution guidelines](.github/CONTRIBUTING.md), then
 post an [issue](https://github.com/commonsguy/cwac-netsecurity/issues).
 **Be certain to include complete steps for reproducing the issue.**
 If you believe that the issue you have found represents a security bug,
-please follow the instructions in [the contribution guidelines](.github/CONTRIBUTING.md).
+please follow the instructions in
+[the contribution guidelines](https://github.com/commonsguy/cwac-netsecurity/blob/master/.github/CONTRIBUTING.md#contributing-security-bug-reports).
 
 Do not ask for help via social media.
 
