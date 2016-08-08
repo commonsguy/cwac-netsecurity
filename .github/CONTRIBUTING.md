@@ -19,6 +19,13 @@ security configuration implementation. If the problem persists, then
 the problem is with the AOSP code. That code can be patched here,
 but it needs to be fixed upstream as well.
 
+## Contributing Security Bug Reports
+
+If you feel that your issue represents a security flaw, contact
+[security@commonsware.com](mailto:security@commonsware.com). Please
+provide the information requested in
+[the "Contributing Bug Reports" section](https://github.com/commonsguy/cwac-netsecurity/blob/master/.github/CONTRIBUTING.md#contributing-bug-reports).
+
 ## Contributing Feature Requests
 
 If you have an idea for how to make the library better, feel free to file an [issue](https://github.com/commonsguy/cwac-cam2/issues).

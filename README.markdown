@@ -120,8 +120,8 @@ for that.
 
 ## Compiling from Source and Running the Test Suites
 
-The instrumentation tests in `androidTest/` are subdivided into two
-groups: `pub` and `priv`.
+The instrumentation tests in `androidTest/` are divided into two
+sub-packages: `pub` and `priv`.
 
 The `pub` tests hit publicly-available Web servers (mostly those
 hosted by CommonsWare). As such, you should be able to run those
@@ -198,6 +198,8 @@ If you have encountered what is clearly a bug, or if you have a feature request,
 please read [the contribution guidelines](.github/CONTRIBUTING.md), then
 post an [issue](https://github.com/commonsguy/cwac-netsecurity/issues).
 **Be certain to include complete steps for reproducing the issue.**
+If you believe that the issue you have found represents a security bug,
+please follow the instructions in [the contribution guidelines](.github/CONTRIBUTING.md).
 
 Do not ask for help via social media.
 
