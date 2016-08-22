@@ -203,34 +203,33 @@ public class CompositeTrustManager implements X509Extensions {
   public void checkServerTrusted(X509Certificate[] chain,
                                  String authType)
     throws CertificateException {
-    passChainToListeners(chain);
+    if (host==null) {
+      passChainToListeners(chain);
 
-    CertificateException first=null;
-    boolean anyGoodResults=false;
+      CertificateException first=null;
+      boolean anyGoodResults=false;
 
-    for (X509Extensions mgr : managers) {
-      try {
-        if (host==null) {
+      for (X509Extensions mgr : managers) {
+        try {
           mgr.checkServerTrusted(chain, authType);
+          anyGoodResults=true;
         }
-        else {
-          mgr.checkServerTrusted(chain, authType, host);
+        catch (CertificateException e) {
+          if (matchAll) {
+            throw e;
+          }
+          else {
+            first=e;
+          }
         }
-
-        anyGoodResults=true;
       }
-      catch (CertificateException e) {
-        if (matchAll) {
-          throw e;
-        }
-        else {
-          first=e;
-        }
+
+      if (!matchAll && !anyGoodResults && first!=null) {
+        throw first;
       }
     }
-
-    if (!matchAll && !anyGoodResults && first!=null) {
-      throw first;
+    else {
+      checkServerTrusted(chain, authType, host);
     }
   }
 
