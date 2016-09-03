@@ -19,39 +19,39 @@ package com.commonsware.cwac.netsecurity.config;
 import java.util.Locale;
 /** @hide */
 public final class Domain {
-  /**
-   * Lower case hostname for this domain rule.
-   */
-  public final String hostname;
+    /**
+     * Lower case hostname for this domain rule.
+     */
+    public final String hostname;
 
-  /**
-   * Whether this domain includes subdomains.
-   */
-  public final boolean subdomainsIncluded;
+    /**
+     * Whether this domain includes subdomains.
+     */
+    public final boolean subdomainsIncluded;
 
-  public Domain(String hostname, boolean subdomainsIncluded) {
-    if (hostname == null) {
-      throw new NullPointerException("Hostname must not be null");
+    public Domain(String hostname, boolean subdomainsIncluded) {
+        if (hostname == null) {
+            throw new NullPointerException("Hostname must not be null");
+        }
+        this.hostname = hostname.toLowerCase(Locale.US);
+        this.subdomainsIncluded = subdomainsIncluded;
     }
-    this.hostname = hostname.toLowerCase(Locale.US);
-    this.subdomainsIncluded = subdomainsIncluded;
-  }
 
-  @Override
-  public int hashCode() {
-    return hostname.hashCode() ^ (subdomainsIncluded ? 1231 : 1237);
-  }
+    @Override
+    public int hashCode() {
+        return hostname.hashCode() ^ (subdomainsIncluded ? 1231 : 1237);
+    }
 
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Domain)) {
+            return false;
+        }
+        Domain otherDomain = (Domain) other;
+        return otherDomain.subdomainsIncluded == this.subdomainsIncluded &&
+                otherDomain.hostname.equals(this.hostname);
     }
-    if (!(other instanceof Domain)) {
-      return false;
-    }
-    Domain otherDomain = (Domain) other;
-    return otherDomain.subdomainsIncluded == this.subdomainsIncluded &&
-      otherDomain.hostname.equals(this.hostname);
-  }
 }

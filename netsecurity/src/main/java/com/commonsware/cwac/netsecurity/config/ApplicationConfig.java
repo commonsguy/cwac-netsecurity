@@ -17,6 +17,7 @@
 package com.commonsware.cwac.netsecurity.config;
 
 import android.util.Pair;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import javax.net.ssl.X509TrustManager;
@@ -30,148 +31,158 @@ import javax.net.ssl.X509TrustManager;
  * @hide
  */
 public final class ApplicationConfig {
-/*
-  private static ApplicationConfig sInstance;
-  private static Object sLock = new Object();
-*/
+    private static ApplicationConfig sInstance;
+    private static Object sLock = new Object();
 
-  private Set<Pair<Domain, NetworkSecurityConfig>> mConfigs;
-  private NetworkSecurityConfig mDefaultConfig;
-  private X509TrustManager mTrustManager;
+    private Set<Pair<Domain, NetworkSecurityConfig>> mConfigs;
+    private NetworkSecurityConfig mDefaultConfig;
+    private X509TrustManager mTrustManager;
 
-  private ConfigSource mConfigSource;
-  private boolean mInitialized;
-  private final Object mLock = new Object();
+    private ConfigSource mConfigSource;
+    private boolean mInitialized;
+    private final Object mLock = new Object();
 
-  public ApplicationConfig(ConfigSource configSource) {
-    mConfigSource = configSource;
-    mInitialized = false;
-  }
-
-  /**
-   * @hide
-   */
-  public boolean hasPerDomainConfigs() {
-    ensureInitialized();
-    return mConfigs != null && !mConfigs.isEmpty();
-  }
-
-  /**
-   * Get the {@link NetworkSecurityConfig} corresponding to the provided hostname.
-   * When matching the most specific matching domain rule will be used, if no match exists
-   * then the default configuration will be returned.
-   *
-   * {@code NetworkSecurityConfig} objects returned by this method can be safely cached for
-   * {@code hostname}. Subsequent calls with the same hostname will always return the same
-   * {@code NetworkSecurityConfig}.
-   *
-   * @return {@link NetworkSecurityConfig} to be used to determine
-   * the network security configuration for connections to {@code hostname}.
-   */
-  public NetworkSecurityConfig getConfigForHostname(String hostname) {
-    ensureInitialized();
-    if (hostname == null || hostname.isEmpty() || mConfigs == null) {
-      return mDefaultConfig;
+    public ApplicationConfig(ConfigSource configSource) {
+        mConfigSource = configSource;
+        mInitialized = false;
     }
-    if (hostname.charAt(0) ==  '.') {
-      throw new IllegalArgumentException("hostname must not begin with a .");
+
+    /**
+     * @hide
+     */
+    public boolean hasPerDomainConfigs() {
+        ensureInitialized();
+        return mConfigs != null && !mConfigs.isEmpty();
     }
-    // Domains are case insensitive.
-    hostname = hostname.toLowerCase(Locale.US);
-    // Normalize hostname by removing trailing . if present, all Domain hostnames are
-    // absolute.
-    if (hostname.charAt(hostname.length() - 1) == '.') {
-      hostname = hostname.substring(0, hostname.length() - 1);
-    }
-    // Find the Domain -> NetworkSecurityConfig entry with the most specific matching
-    // Domain entry for hostname.
-    // TODO: Use a smarter data structure for the lookup.
-    Pair<Domain, NetworkSecurityConfig> bestMatch = null;
-    for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
-      Domain domain = entry.first;
-      NetworkSecurityConfig config = entry.second;
-      // Check for an exact match.
-      if (domain.hostname.equals(hostname)) {
-        return config;
-      }
-      // Otherwise check if the Domain includes sub-domains and that the hostname is a
-      // sub-domain of the Domain.
-      if (domain.subdomainsIncluded
-        && hostname.endsWith(domain.hostname)
-        && hostname.charAt(hostname.length() - domain.hostname.length() - 1) == '.') {
-        if (bestMatch == null) {
-          bestMatch = entry;
-        } else if (domain.hostname.length() > bestMatch.first.hostname.length()) {
-          bestMatch = entry;
+
+    /**
+     * Get the {@link NetworkSecurityConfig} corresponding to the provided hostname.
+     * When matching the most specific matching domain rule will be used, if no match exists
+     * then the default configuration will be returned.
+     *
+     * {@code NetworkSecurityConfig} objects returned by this method can be safely cached for
+     * {@code hostname}. Subsequent calls with the same hostname will always return the same
+     * {@code NetworkSecurityConfig}.
+     *
+     * @return {@link NetworkSecurityConfig} to be used to determine
+     * the network security configuration for connections to {@code hostname}.
+     */
+    public NetworkSecurityConfig getConfigForHostname(String hostname) {
+        ensureInitialized();
+        if (hostname == null || hostname.isEmpty() || mConfigs == null) {
+            return mDefaultConfig;
         }
-      }
-    }
-    if (bestMatch != null) {
-      return bestMatch.second;
-    }
-    // If no match was found use the default configuration.
-    return mDefaultConfig;
-  }
-
-  /**
-   * Returns the {@link X509TrustManager} that implements the checking of trust anchors and
-   * certificate pinning based on this configuration.
-   */
-  public X509TrustManager getTrustManager() {
-    ensureInitialized();
-    return mTrustManager;
-  }
-
-  /**
-   * Returns {@code true} if cleartext traffic is permitted for this application, which is the
-   * case only if all configurations permit cleartext traffic. For finer-grained policy use
-   * {@link #isCleartextTrafficPermitted(String)}.
-   */
-  public boolean isCleartextTrafficPermitted() {
-    ensureInitialized();
-    if (mConfigs != null) {
-      for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
-        if (!entry.second.isCleartextTrafficPermitted()) {
-          return false;
+        if (hostname.charAt(0) ==  '.') {
+            throw new IllegalArgumentException("hostname must not begin with a .");
         }
-      }
+        // Domains are case insensitive.
+        hostname = hostname.toLowerCase(Locale.US);
+        // Normalize hostname by removing trailing . if present, all Domain hostnames are
+        // absolute.
+        if (hostname.charAt(hostname.length() - 1) == '.') {
+            hostname = hostname.substring(0, hostname.length() - 1);
+        }
+        // Find the Domain -> NetworkSecurityConfig entry with the most specific matching
+        // Domain entry for hostname.
+        // TODO: Use a smarter data structure for the lookup.
+        Pair<Domain, NetworkSecurityConfig> bestMatch = null;
+        for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
+            Domain domain = entry.first;
+            NetworkSecurityConfig config = entry.second;
+            // Check for an exact match.
+            if (domain.hostname.equals(hostname)) {
+                return config;
+            }
+            // Otherwise check if the Domain includes sub-domains and that the hostname is a
+            // sub-domain of the Domain.
+            if (domain.subdomainsIncluded
+                    && hostname.endsWith(domain.hostname)
+                    && hostname.charAt(hostname.length() - domain.hostname.length() - 1) == '.') {
+                if (bestMatch == null) {
+                    bestMatch = entry;
+                } else if (domain.hostname.length() > bestMatch.first.hostname.length()) {
+                    bestMatch = entry;
+                }
+            }
+        }
+        if (bestMatch != null) {
+            return bestMatch.second;
+        }
+        // If no match was found use the default configuration.
+        return mDefaultConfig;
     }
 
-    return mDefaultConfig.isCleartextTrafficPermitted();
-  }
-
-  /**
-   * Returns {@code true} if cleartext traffic is permitted for this application when connecting
-   * to {@code hostname}.
-   */
-  public boolean isCleartextTrafficPermitted(String hostname) {
-    return getConfigForHostname(hostname).isCleartextTrafficPermitted();
-  }
-
-  private void ensureInitialized() {
-    synchronized(mLock) {
-      if (mInitialized) {
-        return;
-      }
-      mConfigs = mConfigSource.getPerDomainConfigs();
-      mDefaultConfig = mConfigSource.getDefaultConfig();
-      mConfigSource = null;
-      mTrustManager = new RootTrustManager(this);
-      mInitialized = true;
+    /**
+     * Returns the {@link X509TrustManager} that implements the checking of trust anchors and
+     * certificate pinning based on this configuration.
+     */
+    public X509TrustManager getTrustManager() {
+        ensureInitialized();
+        return mTrustManager;
     }
-  }
 
-/*
-  public static void setDefaultInstance(ApplicationConfig config) {
-    synchronized (sLock) {
-      sInstance = config;
-    }
-  }
+    /**
+     * Returns {@code true} if cleartext traffic is permitted for this application, which is the
+     * case only if all configurations permit cleartext traffic. For finer-grained policy use
+     * {@link #isCleartextTrafficPermitted(String)}.
+     */
+    public boolean isCleartextTrafficPermitted() {
+        ensureInitialized();
+        if (mConfigs != null) {
+            for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
+                if (!entry.second.isCleartextTrafficPermitted()) {
+                    return false;
+                }
+            }
+        }
 
-  public static ApplicationConfig getDefaultInstance() {
-    synchronized (sLock) {
-      return sInstance;
+        return mDefaultConfig.isCleartextTrafficPermitted();
     }
-  }
-*/
+
+    /**
+     * Returns {@code true} if cleartext traffic is permitted for this application when connecting
+     * to {@code hostname}.
+     */
+    public boolean isCleartextTrafficPermitted(String hostname) {
+        return getConfigForHostname(hostname).isCleartextTrafficPermitted();
+    }
+
+    public void handleTrustStorageUpdate() {
+        ensureInitialized();
+        mDefaultConfig.handleTrustStorageUpdate();
+        if (mConfigs != null) {
+            Set<NetworkSecurityConfig> updatedConfigs =
+                    new HashSet<NetworkSecurityConfig>(mConfigs.size());
+            for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
+                if (updatedConfigs.add(entry.second)) {
+                    entry.second.handleTrustStorageUpdate();
+                }
+            }
+        }
+    }
+
+    private void ensureInitialized() {
+        synchronized(mLock) {
+            if (mInitialized) {
+                return;
+            }
+            mConfigs = mConfigSource.getPerDomainConfigs();
+            mDefaultConfig = mConfigSource.getDefaultConfig();
+            mConfigSource = null;
+            mTrustManager = new RootTrustManager(this);
+            mInitialized = true;
+        }
+    }
+
+    public static void setDefaultInstance(ApplicationConfig config) {
+        synchronized (sLock) {
+            sInstance = config;
+        }
+    }
+
+    public static ApplicationConfig getDefaultInstance() {
+        synchronized (sLock) {
+            return sInstance;
+        }
+    }
 }

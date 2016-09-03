@@ -13,53 +13,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.commonsware.cwac.netsecurity.conscrypt;
-import com.commonsware.cwac.netsecurity.luni.Base64;
-import com.commonsware.cwac.netsecurity.luni.DropBox;
+
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-/*
-import libcore.io.Base64;
-import libcore.io.DropBox;
-*/
+//import libcore.io.Base64;
+//import libcore.io.DropBox;
+import com.commonsware.cwac.netsecurity.luni.Base64;
+import com.commonsware.cwac.netsecurity.luni.DropBox;
+
 public class PinFailureLogger {
-  private static final long LOG_INTERVAL_NANOS = 1000 * 1000 * 1000 * 60 * 60;
-  private static long lastLoggedNanos = 0;
-  public static synchronized void log(String cn, boolean chainContainsUserCert,
-                                      boolean pinIsEnforcing,
-                                      List<X509Certificate> chain) {
-    // if we've logged recently, don't do it again
-    if (!timeToLog()) {
-      return;
+
+    private static final long LOG_INTERVAL_NANOS = 1000 * 1000 * 1000 * 60 * 60;
+
+    private static long lastLoggedNanos = 0;
+
+    public static synchronized void log(String cn, boolean chainContainsUserCert,
+                                        boolean pinIsEnforcing,
+                                        List<X509Certificate> chain) {
+        // if we've logged recently, don't do it again
+        if (!timeToLog()) {
+            return;
+        }
+        // otherwise, log the event
+        writeToLog(cn, chainContainsUserCert, pinIsEnforcing, chain);
+        // update the last logged time
+        lastLoggedNanos = System.nanoTime();
     }
-    // otherwise, log the event
-    writeToLog(cn, chainContainsUserCert, pinIsEnforcing, chain);
-    // update the last logged time
-    lastLoggedNanos = System.nanoTime();
-  }
-  protected static synchronized void writeToLog(String cn, boolean chainContainsUserCert,
-                                                boolean pinIsEnforcing,
-                                                List<X509Certificate> chain) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(cn);
-    sb.append("|");
-    sb.append(chainContainsUserCert);
-    sb.append("|");
-    sb.append(pinIsEnforcing);
-    sb.append("|");
-    for (X509Certificate cert : chain) {
-      try {
-        sb.append(Base64.encode(cert.getEncoded()));
-      } catch (CertificateEncodingException e) {
-        sb.append("Error: could not encode certificate");
-      }
-      sb.append("|");
+
+    protected static synchronized void writeToLog(String cn, boolean chainContainsUserCert,
+                                                  boolean pinIsEnforcing,
+                                                  List<X509Certificate> chain) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(cn);
+        sb.append("|");
+        sb.append(chainContainsUserCert);
+        sb.append("|");
+        sb.append(pinIsEnforcing);
+        sb.append("|");
+        for (X509Certificate cert : chain) {
+            try {
+                sb.append(Base64.encode(cert.getEncoded()));
+            } catch (CertificateEncodingException e) {
+                sb.append("Error: could not encode certificate");
+            }
+            sb.append("|");
+        }
+        DropBox.addText("exp_det_cert_pin_failure", sb.toString());
     }
-    DropBox.addText("exp_det_cert_pin_failure", sb.toString());
-  }
-  protected static boolean timeToLog() {
-    long currentTimeNanos = System.nanoTime();
-    return ((currentTimeNanos - lastLoggedNanos) > LOG_INTERVAL_NANOS);
-  }
+
+    protected static boolean timeToLog() {
+        long currentTimeNanos = System.nanoTime();
+        return ((currentTimeNanos - lastLoggedNanos) > LOG_INTERVAL_NANOS);
+    }
 }
+

@@ -24,7 +24,7 @@ public final class Base64 {
   private static final byte[] BASE_64_ALPHABET = initializeBase64Alphabet();
   private static byte[] initializeBase64Alphabet() {
     return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-      .getBytes(StandardCharsets.US_ASCII);
+      .getBytes(/*StandardCharsets.US_ASCII*/);
   }
   // Bit masks for the 4 output 6-bit values from 3 input bytes.
   private static final int FIRST_OUTPUT_BYTE_MASK = 0x3f << 18;
@@ -80,7 +80,7 @@ public final class Base64 {
         output[outputIndex++] = '=';
       }
     }
-    return new String(output, StandardCharsets.US_ASCII);
+    return new String(output/*, StandardCharsets.US_ASCII*/);
   }
   private static int computeEncodingOutputLen(int inLength) {
     int inLengthMod3 = inLength % 3;

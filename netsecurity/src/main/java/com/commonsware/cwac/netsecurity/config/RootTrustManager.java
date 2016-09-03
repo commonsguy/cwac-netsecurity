@@ -16,84 +16,168 @@
 
 package com.commonsware.cwac.netsecurity.config;
 
+import java.lang.reflect.Method;
+import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSession;
+// import javax.net.ssl.X509ExtendedTrustManager;
+import com.commonsware.cwac.netsecurity.luni.X509ExtendedTrustManager;
 
 /**
- * {@link X509TrustManager} based on an {@link ApplicationConfig}.
+ * {@link X509ExtendedTrustManager} based on an {@link ApplicationConfig}.
  *
- * <p>This {@code X509TrustManager} delegates to the specific trust manager for the hostname
- * being used for the connection (See {@link ApplicationConfig#getConfigForHostname(String)} and
+ * <p>This trust manager delegates to the specific trust manager for the hostname being used for
+ * the connection (See {@link ApplicationConfig#getConfigForHostname(String)} and
  * {@link NetworkSecurityTrustManager}).</p>
  *
  * Note that if the {@code ApplicationConfig} has per-domain configurations the hostname aware
  * {@link #checkServerTrusted(X509Certificate[], String String)} must be used instead of the normal
  * non-aware call.
  * @hide */
-public class RootTrustManager implements X509TrustManager {
-  private final ApplicationConfig mConfig;
+public class RootTrustManager extends X509ExtendedTrustManager {
+    private final ApplicationConfig mConfig;
 
-  public RootTrustManager(ApplicationConfig config) {
-    if (config == null) {
-      throw new NullPointerException("config must not be null");
+    public RootTrustManager(ApplicationConfig config) {
+        if (config == null) {
+            throw new NullPointerException("config must not be null");
+        }
+        mConfig = config;
     }
-    mConfig = config;
-  }
 
-  @Override
-  public void checkClientTrusted(X509Certificate[] chain, String authType)
-    throws CertificateException {
-    // Use the default configuration for all client authentication. Domain specific configs are
-    // only for use in checking server trust not client trust.
-    NetworkSecurityConfig config = mConfig.getConfigForHostname("");
-    config.getTrustManager().checkClientTrusted(chain, authType);
-  }
-
-  @Override
-  public void checkServerTrusted(X509Certificate[] certs, String authType)
-    throws CertificateException {
-    if (mConfig.hasPerDomainConfigs()) {
-      throw new CertificateException(
-        "Domain specific configurations require that hostname aware"
-          + " checkServerTrusted(X509Certificate[], String, String) is used");
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType)
+            throws CertificateException {
+        // Use the default configuration for all client authentication. Domain specific configs are
+        // only for use in checking server trust not client trust.
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        config.getTrustManager().checkClientTrusted(chain, authType);
     }
-    NetworkSecurityConfig config = mConfig.getConfigForHostname("");
-    config.getTrustManager().checkServerTrusted(certs, authType);
-  }
 
-  /**
-   * Hostname aware version of {@link #checkServerTrusted(X509Certificate[], String)}.
-   * This interface is used by conscrypt and android.net.http.X509TrustManagerExtensions do not
-   * modify without modifying those callers.
-   */
-  public List<X509Certificate> checkServerTrusted(X509Certificate[] certs, String authType,
-                                                  String hostname) throws CertificateException {
-    if (hostname == null && mConfig.hasPerDomainConfigs()) {
-      throw new CertificateException(
-        "Domain specific configurations require that the hostname be provided");
+    @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType, Socket socket)
+            throws CertificateException {
+        // Use the default configuration for all client authentication. Domain specific configs are
+        // only for use in checking server trust not client trust.
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        config.getTrustManager().checkClientTrusted(certs, authType, socket);
     }
-    NetworkSecurityConfig config = mConfig.getConfigForHostname(hostname);
-    return config.getTrustManager().checkServerTrusted(certs, authType, hostname);
-  }
 
-  /**
-   * Check if the provided certificate is a user added certificate authority.
-   * This is required by android.net.http.X509TrustManagerExtensions.
-   */
-  public boolean isUserAddedCertificate(X509Certificate cert) {
-    // TODO: Figure out the right way to handle this, and if it is still even used.
-    return false;
-  }
+    @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType, SSLEngine engine)
+            throws CertificateException {
+        // Use the default configuration for all client authentication. Domain specific configs are
+        // only for use in checking server trust not client trust.
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        config.getTrustManager().checkClientTrusted(certs, authType, engine);
+    }
 
-  @Override
-  public X509Certificate[] getAcceptedIssuers() {
-    // getAcceptedIssuers is meant to be used to determine which trust anchors the server will
-    // accept when verifying clients. Domain specific configs are only for use in checking
-    // server trust not client trust so use the default config.
-    NetworkSecurityConfig config = mConfig.getConfigForHostname("");
-    return config.getTrustManager().getAcceptedIssuers();
-  }
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType, Socket socket)
+            throws CertificateException {
+        if (socket instanceof SSLSocket) {
+            SSLSocket sslSocket = (SSLSocket) socket;
+            SSLSession session = null; //sslSocket.getHandshakeSession();
+
+            /* MLM reflection to try to get working on older Androids */
+
+            try {
+                Method method=sslSocket.getClass().getMethod("getHandshakeSession");
+
+                if (method!=null) {
+                    session=(SSLSession)method.invoke(sslSocket);
+                }
+            }
+            catch (Exception e) {
+                android.util.Log.d("TrustManagerImpl", "Exception getting handshake session", e);
+            }
+
+            if (session == null) {
+                throw new CertificateException("Not in handshake; no session available");
+            }
+            String host = session.getPeerHost();
+            NetworkSecurityConfig config = mConfig.getConfigForHostname(host);
+            config.getTrustManager().checkServerTrusted(certs, authType, socket);
+        } else {
+            // Not an SSLSocket, use the hostname unaware checkServerTrusted.
+            checkServerTrusted(certs, authType);
+        }
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType, SSLEngine engine)
+            throws CertificateException {
+        SSLSession session = null; //engine.getHandshakeSession();
+
+        /* MLM reflection to try to get working on older Androids */
+
+        try {
+            Method method=engine.getClass().getMethod("getHandshakeSession");
+
+            if (method!=null) {
+                session=(SSLSession)method.invoke(engine);
+            }
+        }
+        catch (Exception e) {
+            android.util.Log.d("TrustManagerImpl", "Exception getting handshake session", e);
+        }
+
+        if (session == null) {
+            throw new CertificateException("Not in handshake; no session available");
+        }
+        String host = session.getPeerHost();
+        NetworkSecurityConfig config = mConfig.getConfigForHostname(host);
+        config.getTrustManager().checkServerTrusted(certs, authType, engine);
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType)
+            throws CertificateException {
+        if (mConfig.hasPerDomainConfigs()) {
+            throw new CertificateException(
+                    "Domain specific configurations require that hostname aware"
+                    + " checkServerTrusted(X509Certificate[], String, String) is used");
+        }
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        config.getTrustManager().checkServerTrusted(certs, authType);
+    }
+
+    /**
+     * Hostname aware version of {@link #checkServerTrusted(X509Certificate[], String)}.
+     * This interface is used by conscrypt and android.net.http.X509TrustManagerExtensions do not
+     * modify without modifying those callers.
+     */
+    public List<X509Certificate> checkServerTrusted(X509Certificate[] certs, String authType,
+            String hostname) throws CertificateException {
+        if (hostname == null && mConfig.hasPerDomainConfigs()) {
+            throw new CertificateException(
+                    "Domain specific configurations require that the hostname be provided");
+        }
+        NetworkSecurityConfig config = mConfig.getConfigForHostname(hostname);
+        return config.getTrustManager().checkServerTrusted(certs, authType, hostname);
+    }
+
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+        // getAcceptedIssuers is meant to be used to determine which trust anchors the server will
+        // accept when verifying clients. Domain specific configs are only for use in checking
+        // server trust not client trust so use the default config.
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        return config.getTrustManager().getAcceptedIssuers();
+    }
+
+    /**
+     * Returns {@code true} if this trust manager uses the same trust configuration for the provided
+     * hostnames.
+     *
+     * <p>This is required by android.net.http.X509TrustManagerExtensions.
+     */
+    public boolean isSameTrustConfiguration(String hostname1, String hostname2) {
+        return mConfig.getConfigForHostname(hostname1)
+                .equals(mConfig.getConfigForHostname(hostname2));
+    }
 }

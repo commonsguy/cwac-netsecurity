@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.commonsware.cwac.netsecurity.conscrypt;
+
 // public for testing by CertPinManagerTest
 public class PinEntryException extends Exception {
-  PinEntryException() {
-  }
-  PinEntryException(String msg) {
-    super(msg);
-  }
+
+    PinEntryException() {
+    }
+
+    PinEntryException(String msg) {
+        super(msg);
+    }
 }
+

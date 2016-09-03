@@ -22,46 +22,50 @@ import java.util.Set;
 
 /** @hide */
 public final class CertificatesEntryRef {
-  private final CertificateSource mSource;
-  private final boolean mOverridesPins;
+    private final CertificateSource mSource;
+    private final boolean mOverridesPins;
 
-  public CertificatesEntryRef(CertificateSource source, boolean overridesPins) {
-    mSource = source;
-    mOverridesPins = overridesPins;
-  }
-
-  boolean overridesPins() {
-    return mOverridesPins;
-  }
-
-  public Set<TrustAnchor> getTrustAnchors() {
-    // TODO: cache this [but handle mutable sources]
-    Set<TrustAnchor> anchors = new HashSet<>();
-    for (X509Certificate cert : mSource.getCertificates()) {
-      anchors.add(new TrustAnchor(cert, mOverridesPins));
-    }
-    return anchors;
-  }
-
-  public TrustAnchor findBySubjectAndPublicKey(X509Certificate cert) {
-    X509Certificate foundCert = mSource.findBySubjectAndPublicKey(cert);
-    if (foundCert == null) {
-      return null;
+    public CertificatesEntryRef(CertificateSource source, boolean overridesPins) {
+        mSource = source;
+        mOverridesPins = overridesPins;
     }
 
-    return new TrustAnchor(foundCert, mOverridesPins);
-  }
-
-  public TrustAnchor findByIssuerAndSignature(X509Certificate cert) {
-    X509Certificate foundCert = mSource.findByIssuerAndSignature(cert);
-    if (foundCert == null) {
-      return null;
+    boolean overridesPins() {
+        return mOverridesPins;
     }
 
-    return new TrustAnchor(foundCert, mOverridesPins);
-  }
+    public Set<TrustAnchor> getTrustAnchors() {
+        // TODO: cache this [but handle mutable sources]
+        Set<TrustAnchor> anchors = new HashSet<>();
+        for (X509Certificate cert : mSource.getCertificates()) {
+            anchors.add(new TrustAnchor(cert, mOverridesPins));
+        }
+        return anchors;
+    }
 
-  public Set<X509Certificate> findAllCertificatesByIssuerAndSignature(X509Certificate cert) {
-    return mSource.findAllByIssuerAndSignature(cert);
-  }
+    public TrustAnchor findBySubjectAndPublicKey(X509Certificate cert) {
+        X509Certificate foundCert = mSource.findBySubjectAndPublicKey(cert);
+        if (foundCert == null) {
+            return null;
+        }
+
+        return new TrustAnchor(foundCert, mOverridesPins);
+    }
+
+    public TrustAnchor findByIssuerAndSignature(X509Certificate cert) {
+        X509Certificate foundCert = mSource.findByIssuerAndSignature(cert);
+        if (foundCert == null) {
+            return null;
+        }
+
+        return new TrustAnchor(foundCert, mOverridesPins);
+    }
+
+    public Set<X509Certificate> findAllCertificatesByIssuerAndSignature(X509Certificate cert) {
+        return mSource.findAllByIssuerAndSignature(cert);
+    }
+
+    public void handleTrustStorageUpdate() {
+        mSource.handleTrustStorageUpdate();
+    }
 }

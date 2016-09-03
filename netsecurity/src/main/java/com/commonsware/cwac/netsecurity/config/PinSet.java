@@ -16,31 +16,32 @@
 
 package com.commonsware.cwac.netsecurity.config;
 
+import android.util.ArraySet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /** @hide */
 public final class PinSet {
-  public static final PinSet EMPTY_PINSET =
-    new PinSet(Collections.<Pin>emptySet(), Long.MAX_VALUE);
-  public final long expirationTime;
-  public final Set<Pin> pins;
+    public static final PinSet EMPTY_PINSET =
+            new PinSet(Collections.<Pin>emptySet(), Long.MAX_VALUE);
+    public final long expirationTime;
+    public final Set<Pin> pins;
 
-  public PinSet(Set<Pin> pins, long expirationTime) {
-    if (pins == null) {
-      throw new NullPointerException("pins must not be null");
+    public PinSet(Set<Pin> pins, long expirationTime) {
+        if (pins == null) {
+            throw new NullPointerException("pins must not be null");
+        }
+        this.pins = pins;
+        this.expirationTime = expirationTime;
     }
-    this.pins = pins;
-    this.expirationTime = expirationTime;
-  }
 
-  Set<String> getPinAlgorithms() {
-    // TODO: Cache this.
-    Set<String> algorithms = new HashSet<>();
-    for (Pin pin : pins) {
-      algorithms.add(pin.digestAlgorithm);
+    Set<String> getPinAlgorithms() {
+        // TODO: Cache this.
+        Set<String> algorithms = new HashSet<>();
+        for (Pin pin : pins) {
+            algorithms.add(pin.digestAlgorithm);
+        }
+        return algorithms;
     }
-    return algorithms;
-  }
 }

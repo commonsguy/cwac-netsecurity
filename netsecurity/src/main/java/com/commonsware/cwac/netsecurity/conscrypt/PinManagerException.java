@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.commonsware.cwac.netsecurity.conscrypt;
+
 class PinManagerException extends Exception {
-  PinManagerException() {
-  }
-  PinManagerException(String msg) {
-    super(msg);
-  }
-  PinManagerException(String msg, Exception e) {
-    super(msg, e);
-  }
+
+    PinManagerException() {
+    }
+
+    PinManagerException(String msg) {
+        super(msg);
+    }
+
+    PinManagerException(String msg, Exception e) {
+        super(msg, e);
+    }
 }
+

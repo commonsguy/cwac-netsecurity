@@ -13,28 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.commonsware.cwac.netsecurity.config;
+
 import android.os.Environment;
 import android.os.UserHandle;
 import java.io.File;
+
 /**
  * {@link CertificateSource} based on the system trusted CA store.
  * @hide
  */
 public final class SystemCertificateSource extends DirectoryCertificateSource {
-  private static final SystemCertificateSource INSTANCE = new SystemCertificateSource();
-//  private final File mUserRemovedCaDir;
-  private SystemCertificateSource() {
-    super(new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts"));
-//    File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
-//    mUserRemovedCaDir = new File(configDir, "cacerts-removed");
-  }
-  public static SystemCertificateSource getInstance() {
-    return INSTANCE;
-  }
-  @Override
-  protected boolean isCertMarkedAsRemoved(String caFile) {
-    //return new File(mUserRemovedCaDir, caFile).exists();
-    return(false);
-  }
+    private static class NoPreloadHolder {
+        private static final SystemCertificateSource INSTANCE = new SystemCertificateSource();
+    }
+
+//    private final File mUserRemovedCaDir;
+
+    private SystemCertificateSource() {
+        super(new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts"));
+/*
+        File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
+        mUserRemovedCaDir = new File(configDir, "cacerts-removed");
+*/
+    }
+
+    public static SystemCertificateSource getInstance() {
+        return NoPreloadHolder.INSTANCE;
+    }
+
+    @Override
+    protected boolean isCertMarkedAsRemoved(String caFile) {
+//        return new File(mUserRemovedCaDir, caFile).exists();
+        return(false);
+    }
 }
