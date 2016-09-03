@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:netsecurity:0.0.1'
+    compile 'com.commonsware.cwac:netsecurity:0.1.0'
     compile 'com.squareup.okhttp3:okhttp:3.4.0'
 }
 ```
@@ -156,7 +156,7 @@ module with the CRT file that matches your self-signed certificate that
 
 `netsecurity` has a `provided` dependency on OkHttp3. This library
 should fairly closely track the latest OkHttp3 release, presently
-**3.4.0**. If you find
+**3.4.1**. If you find
 that the library has fallen behind, please
 [file an issue](https://github.com/commonsguy/cwac-netsecurity/issues)
 if one has not already been filed.
@@ -167,7 +167,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.0.1**.
+The current version is **0.1.0**.
 
 ## Demo
 
@@ -208,4 +208,5 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.1.0         |Android 7.0 source code from the SDK, plus [the `android-7.0.0_r1` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.0.0_r1)|update for new version of Android|
 |v0.0.1         |[`android-n-preview-4`](https://android.googlesource.com/platform/frameworks/base/+/android-n-preview-4)|initial release|
