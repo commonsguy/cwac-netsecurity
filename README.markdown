@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     compile 'com.commonsware.cwac:netsecurity:0.1.0'
-    compile 'com.squareup.okhttp3:okhttp:3.4.0'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
 }
 ```
 
