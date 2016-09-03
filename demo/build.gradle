@@ -12,13 +12,13 @@ dependencies {
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     debugCompile project(':netsecurity')
-    releaseCompile 'com.commonsware.cwac:netsecurity:0.0.1'
-    compile 'com.squareup.okhttp3:okhttp:3.4.0'
+    releaseCompile 'com.commonsware.cwac:netsecurity:0.1.0'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
 }
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.0"
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         minSdkVersion 17
