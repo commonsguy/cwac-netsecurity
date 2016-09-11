@@ -99,6 +99,9 @@ upcoming HTTP request. If you fail to do this, and your app is running
 on an Android 4.2-6.0 device, any `<domain-config>` rules will
 be ignored, akin to the stock `HttpURLConnection` integration.
 
+This is handled automatically for OkHttp3 and `HttpUrlConnection`
+in the existing library code.
+
 ### Handling Redirects
 
 If your HTTP client automatically traverses server-side redirects
