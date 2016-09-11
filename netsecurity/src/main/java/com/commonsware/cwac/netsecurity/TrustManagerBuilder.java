@@ -93,6 +93,7 @@ public class TrustManagerBuilder {
 
       ssl.init(null, trustManagers, null);
       ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
+      mgr.setHost(c.getURL().getHost());
     }
 
     return(c);
