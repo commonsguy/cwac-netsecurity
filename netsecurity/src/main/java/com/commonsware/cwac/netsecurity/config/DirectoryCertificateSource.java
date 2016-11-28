@@ -196,7 +196,9 @@ abstract class DirectoryCertificateSource implements CertificateSource {
             return null;
         } finally {
             try {
-                is.close();
+                if (is != null) {
+                    is.close();
+                }
             } catch (RuntimeException rethrown) {
                 throw rethrown;
             } catch (Exception ignored) {
