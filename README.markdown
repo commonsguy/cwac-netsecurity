@@ -202,6 +202,11 @@ If you believe that the issue you have found represents a security bug,
 please follow the instructions in
 [the contribution guidelines](https://github.com/commonsguy/cwac-netsecurity/blob/master/.github/CONTRIBUTING.md#contributing-security-bug-reports).
 
+You are also welcome to join
+[the CommonsWare Community](https://community.commonsware.com/)
+and post questions
+and ideas to [the CWAC category](https://community.commonsware.com/c/cwac).
+
 Do not ask for help via social media.
 
 ## AOSP Version Tracking and Release Notes
