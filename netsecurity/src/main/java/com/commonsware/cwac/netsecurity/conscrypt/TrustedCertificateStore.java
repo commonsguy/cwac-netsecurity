@@ -191,7 +191,9 @@ public class TrustedCertificateStore {
             return null;
         } finally {
             try {
-                is.close();
+                if (is!=null) {
+                    is.close();
+                }
             } catch (RuntimeException rethrown) {
                 throw rethrown;
             } catch (Exception ignored) {
@@ -211,7 +213,9 @@ public class TrustedCertificateStore {
             os.write(cert.getEncoded());
         } finally {
             try {
-                os.close();
+                if (os!=null) {
+                    os.close();
+                }
             } catch (RuntimeException rethrown) {
                 throw rethrown;
             } catch (Exception ignored) {

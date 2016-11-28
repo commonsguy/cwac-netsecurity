@@ -66,7 +66,9 @@ public class ResourceCertificateSource implements CertificateSource {
                         e);
             } finally {
                 try {
-                    in.close();
+                    if (in!=null) {
+                        in.close();
+                    }
                 } catch (RuntimeException rethrown) {
                     throw rethrown;
                 } catch (Exception ignored) {
