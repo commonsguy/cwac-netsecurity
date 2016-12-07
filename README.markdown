@@ -33,8 +33,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:netsecurity:0.2.1'
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'com.commonsware.cwac:netsecurity:0.3.0'
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
 }
 ```
 
@@ -111,12 +111,29 @@ If you have them in the XML, they will be ignored.
 OkHttp3 should support the full range of network security configuration
 XML features.
 
+The `<certificates src="user" />` cannot really be supported prior to Android 7.0,
+insofar as the system will check user certificates any time it checks for
+system certificates. If you include such an element in a configuration:
+
+- If you are using `withManifestConfig()`, a warning will be logged to LogCat,
+and the element will be treated as if it were `<certificates src="system" />`
+
+- If you are using anything else (e.g., `withConfig()`), your app will crash
+at startup, with an error indicating that `<certificates src="user" />` is not
+supported
+
 ## Advanced Usage
 
 If you want to do more sophisticated things with the network security
 configuration backport and/or `TrustManagerBuilder`, there is a
 [separate page of documentation](https://github.com/commonsguy/cwac-netsecurity/blob/master/docs/ADVANCED_USAGE.markdown)
 for that.
+
+## Notes for Upgraders
+
+If you are upgrading to v0.3.0 or higher from v0.2.1 or older, and you
+are using `<certificates src="user" />`, note that this is no longer supported
+(see above).
 
 ## Compiling from Source and Running the Test Suites
 
@@ -155,8 +172,9 @@ module with the CRT file that matches your self-signed certificate that
 ## Dependencies
 
 `netsecurity` has a `provided` dependency on OkHttp3. This library
-should fairly closely track the latest OkHttp3 release, presently
-**3.4.1**. If you find
+should fairly closely track the latest OkHttp3 release. Version 0.3.0
+of this library uses OkHttp version
+**3.5.0**. If you find
 that the library has fallen behind, please
 [file an issue](https://github.com/commonsguy/cwac-netsecurity/issues)
 if one has not already been filed.
@@ -167,7 +185,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.2.1**.
+The current version is **0.3.0**.
 
 ## Demo
 
@@ -213,6 +231,7 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.3.0         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|`user` validation per [issue #5](https://github.com/commonsguy/cwac-netsecurity/issues/5)|
 |v0.2.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|bug fix per [issue #3](https://github.com/commonsguy/cwac-netsecurity/issues/3)|
 |v0.2.0         |Android 7.0 source code from the SDK, plus [the `android-7.0.0_r1` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.0.0_r1)|`HttpURLConnection` no longer requires `setHost()` call|
 |v0.1.0         |Android 7.0 source code from the SDK, plus [the `android-7.0.0_r1` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.0.0_r1)|update for new version of Android|
