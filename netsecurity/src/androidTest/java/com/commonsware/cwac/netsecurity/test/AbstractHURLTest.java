@@ -37,47 +37,59 @@ abstract public class AbstractHURLTest {
 
   @Test
   public void testRequest() throws Exception {
-    HttpURLConnection c=
-      (HttpURLConnection)new URL(getUrl()).openConnection();
-    boolean hasBuilder=false;
-
-    if (c instanceof HttpsURLConnection) {
-      TrustManagerBuilder builder=getBuilder();
-
-      if (builder!=null) {
-        hasBuilder=true;
-
-        builder.withCertChainListener(new CertChainListener() {
-          @Override
-          public void onChain(X509Certificate[] chain,
-                              String domain) {
-            receivedChain=true;
-          }
-        }).applyTo(c);
+    if (isExceptionExpectedForBuilder()) {
+      try {
+        TrustManagerBuilder builder=getBuilder();
+        Assert.fail("expected exception, did not get one");
+      }
+      catch (Exception e) {
+        // life is good
       }
     }
+    else {
+      HttpURLConnection c=
+        (HttpURLConnection)new URL(getUrl()).openConnection();
+      boolean hasBuilder=false;
 
-    try {
-      InputStream in=c.getInputStream();
+      if (c instanceof HttpsURLConnection) {
+        TrustManagerBuilder builder=getBuilder();
+
+        if (builder!=null) {
+          hasBuilder=true;
+
+          builder.withCertChainListener(new CertChainListener() {
+            @Override
+            public void onChain(X509Certificate[] chain,
+                                String domain) {
+              receivedChain=true;
+            }
+          }).applyTo(c);
+        }
+      }
 
       try {
-        if (!isPositiveTest()) {
-          throw new AssertionFailedError("Expected SSLHandshakeException, did not get!");
+        InputStream in=c.getInputStream();
+
+        try {
+          if (!isPositiveTest()) {
+            throw new AssertionFailedError(
+              "Expected SSLHandshakeException, did not get!");
+          }
+
+          Assert.assertEquals(getExpectedResponse(), slurp(in));
+
+          if (hasBuilder) {
+            Assert.assertTrue("Received chain", receivedChain);
+          }
         }
-
-        Assert.assertEquals(getExpectedResponse(), slurp(in));
-
-        if (hasBuilder) {
-          Assert.assertTrue("Received chain", receivedChain);
+        finally {
+          in.close();
         }
       }
-      finally {
-        in.close();
-      }
-    }
-    catch (SSLHandshakeException e) {
-      if (isPositiveTest()) {
-        throw e;
+      catch (SSLHandshakeException e) {
+        if (isPositiveTest()) {
+          throw e;
+        }
       }
     }
   }
@@ -88,6 +100,10 @@ abstract public class AbstractHURLTest {
 
   protected boolean isPositiveTest() {
     return(true);
+  }
+
+  protected boolean isExceptionExpectedForBuilder() {
+    return(false);
   }
 
   // based on http://stackoverflow.com/a/309718/115145

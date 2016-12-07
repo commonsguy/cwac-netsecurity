@@ -15,13 +15,18 @@
 package com.commonsware.cwac.netsecurity;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.XmlRes;
+import android.util.Log;
 import com.commonsware.cwac.netsecurity.config.ApplicationConfig;
 import com.commonsware.cwac.netsecurity.config.ConfigSource;
 import com.commonsware.cwac.netsecurity.config.ManifestConfigSource;
 import com.commonsware.cwac.netsecurity.config.XmlConfigSource;
+import org.xmlpull.v1.XmlPullParser;
 import java.net.HttpURLConnection;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -55,6 +60,7 @@ import javax.net.ssl.X509TrustManager;
  * attaches a TrustManagerBuilder to an OkHttpClient.Builder.
  */
 public class TrustManagerBuilder {
+  private static final String META_DATA_NAME="android.security.net.config";
   private CompositeTrustManager mgr=CompositeTrustManager.matchAll();
   private ApplicationConfig appConfig=null;
 
@@ -211,6 +217,8 @@ public class TrustManagerBuilder {
    */
   public TrustManagerBuilder withConfig(@NonNull Context ctxt,
                                         @XmlRes int resourceId) {
+    validateConfig(ctxt, resourceId, false);
+
     return(withConfig(new XmlConfigSource(ctxt, resourceId, false)));
   }
 
@@ -227,6 +235,8 @@ public class TrustManagerBuilder {
   public TrustManagerBuilder withConfig(@NonNull Context ctxt,
                                         @XmlRes int resourceId,
                                         boolean isDebugBuild) {
+    validateConfig(ctxt, resourceId, false);
+
     return(withConfig(new XmlConfigSource(ctxt, resourceId,
       isDebugBuild)));
   }
@@ -240,6 +250,30 @@ public class TrustManagerBuilder {
    */
   public TrustManagerBuilder withManifestConfig(@NonNull Context ctxt) {
     if (Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
+      ApplicationInfo info=null;
+
+      try {
+        info=ctxt.getPackageManager().getApplicationInfo(ctxt.getPackageName(),
+          PackageManager.GET_META_DATA);
+      }
+      catch (PackageManager.NameNotFoundException e) {
+        throw new RuntimeException("We could not find ourselves?!?", e);
+      }
+
+      if (info.metaData==null) {
+        throw new RuntimeException("Could not find manifest meta-data!");
+      }
+      else {
+        int resourceId=info.metaData.getInt(META_DATA_NAME, -1);
+
+        if (resourceId==-1) {
+          throw new RuntimeException("Could not find android.security.net.config meta-data!");
+        }
+        else {
+          validateConfig(ctxt, resourceId, true);
+        }
+      }
+
       return(withConfig(new ManifestConfigSource(ctxt)));
     }
 
@@ -290,5 +324,46 @@ public class TrustManagerBuilder {
     }
 
     return(appConfig.isCleartextTrafficPermitted(hostname));
+  }
+
+  private void validateConfig(Context ctxt, int resourceId,
+                              boolean isUserAllowed) {
+    XmlResourceParser xpp=ctxt.getResources().getXml(resourceId);
+    RuntimeException result=null;
+
+    try {
+      while (xpp.getEventType()!=XmlPullParser.END_DOCUMENT) {
+        if (xpp.getEventType()==XmlPullParser.START_TAG) {
+          if ("certificates".equals(xpp.getName())) {
+            for (int i=0; i<xpp.getAttributeCount(); i++) {
+              String name=xpp.getAttributeName(i);
+
+              if ("src".equals(name)) {
+                String src=xpp.getAttributeValue(i);
+
+                if ("user".equals(src)) {
+                  if (isUserAllowed) {
+                    Log.w("CWAC-NetSecurity", "requested <certificates src=\"user\">, treating as <certificates src=\"system\">");
+                  }
+                  else {
+                    result=new RuntimeException(
+                      "requested <certificates src=\"user\">, not supported");
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        xpp.next();
+      }
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Could not parse config XML", e);
+    }
+
+    if (result!=null) {
+      throw result;
+    }
   }
 }
