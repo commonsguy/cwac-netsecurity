@@ -1,7 +1,7 @@
 # CWAC-NetSecurity: Simplifying Secure Internet Access
 
 This library contains a backport of
-[the Android 7.0 network security configuration](https://developer.android.com/preview/features/security-config.html)
+[the Android 7.0 network security configuration](https://developer.android.com/training/articles/security-config.html)
 subsystem. In Android 7.0, this subsystem makes it easier for developers
 to tie their app to particular certificate authorities or certificates,
 support self-signed certificates, and handle other advanced SSL
@@ -48,7 +48,7 @@ other HTTP client stack, you can skip the OkHttp3 dependency.
 ## Basic Usage
 
 Start by following
-[Google's documentation for the Android 7.0 network security configuration](https://developer.android.com/preview/features/security-config.html).
+[Google's documentation for the Android 7.0 network security configuration](https://developer.android.com/training/articles/security-config.html).
 Ideally, confirm that your configuration works using an Android 7.0+
 device.
 
