@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:netsecurity:0.3.0'
+    compile 'com.commonsware.cwac:netsecurity:0.3.1'
     compile 'com.squareup.okhttp3:okhttp:3.5.0'
 }
 ```
@@ -185,7 +185,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.3.0**.
+The current version is **0.3.1**.
 
 ## Demo
 
@@ -231,6 +231,7 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.3.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|bug fix per [issue #7](https://github.com/commonsguy/cwac-netsecurity/issues/7)|
 |v0.3.0         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|`user` validation per [issue #5](https://github.com/commonsguy/cwac-netsecurity/issues/5)|
 |v0.2.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|bug fix per [issue #3](https://github.com/commonsguy/cwac-netsecurity/issues/3)|
 |v0.2.0         |Android 7.0 source code from the SDK, plus [the `android-7.0.0_r1` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.0.0_r1)|`HttpURLConnection` no longer requires `setHost()` call|

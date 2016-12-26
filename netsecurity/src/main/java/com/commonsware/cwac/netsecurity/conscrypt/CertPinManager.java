@@ -137,6 +137,8 @@ public class CertPinManager {
             out.append(buffer, 0, rsz);
         }
 
+        is.close();
+
         return out.toString();
     }
 
