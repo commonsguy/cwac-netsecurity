@@ -7,16 +7,16 @@
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application
+    android:name=".DemoApplication"
     android:allowBackup="false"
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name"
-    android:networkSecurityConfig="@xml/net_security_config">
-    <meta-data
-      android:name="android.security.net.config"
-      android:resource="@xml/net_security_config" />
+    android:theme="@style/Theme.Apptheme">
     <activity
-      android:name="MainActivity"
-      android:label="@string/app_name">
+      android:name=".DemoActivity"
+      android:label="@string/app_name"
+      android:process=":cwac_net_security" />
+    <activity android:name=".ConfigActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 

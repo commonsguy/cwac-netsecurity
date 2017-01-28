@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="app_name">CWAC NetSecurity Demo</string>
+	<string name="app_name">CWAC NetSecurity Playground</string>
 	<string name="icon">Owner Icon</string>
+	<string name="menu_run">Run</string>
+	<string name="pref_memo">Enable memorization?</string>
+	<string name="pref_tofu">Enable TOFU?</string>
+	<string name="pref_netcipher">Use NetCipher?</string>
+	<string name="pref_log_cert_chain">Log certificate chains?</string>
+	<string name="menu_clear">Clear</string>
+	<string name="pref_proxy">Use proxy?</string>
+	<string name="pref_proxy_host">Proxy host</string>
+	<string name="pref_proxy_port">Proxy port</string>
+	<string name="prefs_net_sec_config">Also apply network security config?</string>
+	<string name="msg_timeout">Tor not available; timed out</string>
+	<string name="msg_crash">Ick! We crashed!</string>
+	<string name="msg_invalid">Hey! Our communications are not going over Tor!</string>
 
 </resources>

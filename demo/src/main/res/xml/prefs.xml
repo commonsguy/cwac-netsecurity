@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="memo"
+    android:title="@string/pref_memo" />
+  <SwitchPreference
+    android:defaultValue="true"
+    android:dependency="memo"
+    android:key="tofu"
+    android:title="@string/pref_tofu" />
+  <SwitchPreference
+    android:defaultValue="true"
+    android:dependency="memo"
+    android:key="net_sec_config"
+    android:title="@string/prefs_net_sec_config" />
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="netcipher"
+    android:title="@string/pref_netcipher" />
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="proxy"
+    android:title="@string/pref_proxy" />
+  <EditTextPreference
+    android:defaultValue="10.0.2.2"
+    android:dependency="proxy"
+    android:key="proxy_host"
+    android:title="@string/pref_proxy_host" />
+  <EditTextPreference
+    android:defaultValue="8080"
+    android:dependency="proxy"
+    android:key="proxy_port"
+    android:title="@string/pref_proxy_port" />
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="log_cert_chain"
+    android:title="@string/pref_log_cert_chain" />
+</PreferenceScreen>

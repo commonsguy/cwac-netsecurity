@@ -1,5 +1,5 @@
 /***
-  Copyright (c) 2013-2016 CommonsWare, LLC
+  Copyright (c) 2013-2017 CommonsWare, LLC
   Licensed under the Apache License, Version 2.0 (the "License"); you may not
   use this file except in compliance with the License. You may obtain a copy
   of the License at http://www.apache.org/licenses/LICENSE-2.0. Unless required
@@ -14,7 +14,7 @@ package com.commonsware.cwac.netsecurity.demo;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class MainActivity extends Activity {
+public class DemoActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -24,5 +24,12 @@ public class MainActivity extends Activity {
                           .add(android.R.id.content,
                                new QuestionsFragment()).commit();
     }
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+
+    System.exit(0); // this is evil; do not do this in production code
   }
 }
