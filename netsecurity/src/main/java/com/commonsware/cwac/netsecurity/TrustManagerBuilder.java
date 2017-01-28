@@ -274,7 +274,7 @@ public class TrustManagerBuilder {
         }
       }
 
-      return(withConfig(new ManifestConfigSource(ctxt)));
+      return(withConfig(new ManifestConfigSource(ctxt.getApplicationContext())));
     }
 
     return(this);

@@ -26,9 +26,9 @@ import javax.net.ssl.X509TrustManager;
  * apply OR and AND logic to determine the response.
  */
 public class CompositeTrustManager implements X509Extensions {
+  private static final ThreadLocal<String> host=new ThreadLocal<>();
   private ArrayList<X509Extensions> managers=new ArrayList<>();
   private boolean matchAll;
-  private String host;
   private ArrayList<CertChainListener> certChainListeners=
     new ArrayList<>();
 
@@ -71,7 +71,7 @@ public class CompositeTrustManager implements X509Extensions {
    * @param host
    */
   public void setHost(String host) {
-    this.host=host;
+    this.host.set(host);
   }
 
   /**
@@ -229,7 +229,7 @@ public class CompositeTrustManager implements X509Extensions {
       }
     }
     else {
-      checkServerTrusted(chain, authType, host);
+      checkServerTrusted(chain, authType, host.get());
     }
   }
 
@@ -307,7 +307,7 @@ public class CompositeTrustManager implements X509Extensions {
   }
 
   private void passChainToListeners(X509Certificate[] chain) {
-    passChainToListeners(chain, host);
+    passChainToListeners(chain, host.get());
   }
 
   private void passChainToListeners(X509Certificate[] chain,

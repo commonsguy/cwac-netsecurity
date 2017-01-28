@@ -70,16 +70,8 @@ abstract public class AbstractOkHttp3Test {
       }
     }
     catch (SSLHandshakeException e) {
-      if (e.getCause() instanceof CertificateNotMemorizedException) {
-        onNotMemorized((CertificateNotMemorizedException)e.getCause());
-
-        Response response=builder.build().newCall(request).execute();
-        Assert.assertEquals(getExpectedResponse(), response.body().string());
-      }
-      else {
-        if (isPositiveTest()) {
-          throw e;
-        }
+      if (isPositiveTest()) {
+        throw e;
       }
     }
     catch (RuntimeException e) {
@@ -96,10 +88,5 @@ abstract public class AbstractOkHttp3Test {
 
   protected boolean isPositiveTest() {
     return(true);
-  }
-
-  protected void onNotMemorized(CertificateNotMemorizedException e)
-    throws Exception {
-    throw e;
   }
 }

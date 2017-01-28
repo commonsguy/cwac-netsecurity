@@ -11,10 +11,21 @@
 
 package com.commonsware.cwac.netsecurity;
 
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-public class CertificateNotMemorizedException extends MemorizationException {
-  CertificateNotMemorizedException(X509Certificate[] chain, String host) {
-    super(chain, host);
+public class MemorizationException extends CertificateException {
+  public final X509Certificate[] chain;
+  public final String host;
+
+  MemorizationException(X509Certificate[] chain, String host) {
+    this(chain, host, null);
+  }
+
+  MemorizationException(X509Certificate[] chain, String host, Throwable t) {
+    super("Certificate not found in keystore", t);
+
+    this.host=host;
+    this.chain=chain;
   }
 }

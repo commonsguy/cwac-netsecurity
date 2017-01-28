@@ -1,5 +1,5 @@
 /***
-  Copyright (c) 2014-2016 CommonsWare, LLC
+  Copyright (c) 2014-2017 CommonsWare, LLC
   
   Licensed under the Apache License, Version 2.0 (the "License"); you may
   not use this file except in compliance with the License. You may obtain
@@ -14,15 +14,13 @@
 
 package com.commonsware.cwac.netsecurity;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.LruCache;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -34,75 +32,61 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Implementation of a memorizing trust manager, inspired by
  * https://github.com/ge0rg/MemorizingTrustManager, but
- * designed to be used by TrustManagerBuilder.
+ * designed to be used by CompositeTrustManager.
  *
- * Still a work in progress, as this really needs domain-specific
- * stores.
+ * If you use this class, you will get SSLHandshakeExceptions in two
+ * cases. One is if we do not have a certificate for the domain (host)
+ * used for this request, and you called noTOFU() on the
+ * Builder. In that case, getCause() of the
+ * SSLHandshakeException will contain a CertificateNotMemorizedException.
+ * You can deal with that as you see fit, including passing it to
+ * memorize() or memorizeForNow() on the MemorizingTrustManager to
+ * memorize it.
+ *
+ * The other SSLHandshakeException scenario of note is if we *do*
+ * have a certificate for this host, but it does not match the
+ * server when we tried connecting to it. In that case, getCause()
+ * on the SSLHandshakeException will return a MemorizationMismatchException.
+ * Either the server legitimately changed SSL certificates since
+ * you memorized the last one, or an MITM attack is going on.
+ *
+ * Use MemorizingTrustManager.Builder to create instances of this.
  */
 public class MemorizingTrustManager implements X509Extensions {
-  private KeyStore keyStore=null;
-  private Options options=null;
-  private X509TrustManager storeTrustManager=null;
-  private KeyStore transientKeyStore=null;
-  private X509TrustManager transientTrustManager=null;
+  private final File workingDir;
+  private final char[] storePassword;
+  private final String storeType;
+  private final boolean noTOFU;
+  private final LruCache<String, MemorizingStore> stores;
 
-  /**
-   * Standard constructor
-   *
-   * @param options
-   *          a MemorizingTrustManager.Options object, to
-   *          configure the memorization behavior
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   * @throws CertificateException
-   * @throws IOException
-   */
-  public MemorizingTrustManager(@NonNull Options options)
-      throws KeyStoreException, NoSuchAlgorithmException,
-      CertificateException, IOException {
-    this.options=options;
-
-    clear(false);
+  private MemorizingTrustManager(File workingDir, char[] storePassword,
+                                 String storeType, boolean noTOFU,
+                                 int cacheSize) {
+    this.workingDir=workingDir;
+    this.storePassword=storePassword;
+    this.storeType=storeType;
+    this.noTOFU=noTOFU;
+    this.stores=new LruCache<>(cacheSize);
   }
 
   /*
    * {@inheritDoc}
    */
   @Override
-  synchronized public void checkClientTrusted(@NonNull X509Certificate[] chain,
+  public void checkClientTrusted(@NonNull X509Certificate[] chain,
                                               String authType)
     throws CertificateException {
-    try {
-      storeTrustManager.checkClientTrusted(chain, authType);
-    }
-    catch (CertificateException e) {
-      try {
-        transientTrustManager.checkClientTrusted(chain, authType);
-      }
-      catch (CertificateException e2) {
-        throw new CertificateNotMemorizedException(chain);
-      }
-    }
+    throw new UnsupportedOperationException("Client checks not supported");
   }
 
   /*
    * {@inheritDoc}
    */
   @Override
-  synchronized public void checkServerTrusted(@NonNull X509Certificate[] chain,
+  public void checkServerTrusted(@NonNull X509Certificate[] chain,
                                               String authType)
     throws CertificateException {
-    try {
-      storeTrustManager.checkServerTrusted(chain, authType);
-    }
-    catch (CertificateException e) {
-      try {
-        transientTrustManager.checkServerTrusted(chain, authType);
-      }
-      catch (CertificateException e2) {
-        throw new CertificateNotMemorizedException(chain);
-      }
-    }
+    throw new IllegalStateException("Must use three-parameter checkServerTrusted()");
   }
 
   /*
@@ -117,10 +101,22 @@ public class MemorizingTrustManager implements X509Extensions {
    * {@inheritDoc}
    */
   @Override
-  synchronized public List<X509Certificate> checkServerTrusted(
+  public List<X509Certificate> checkServerTrusted(
     @NonNull X509Certificate[] chain, String authType, String host)
     throws CertificateException {
-    checkServerTrusted(chain, authType);
+
+    try {
+      getStoreForHost(host).checkServerTrusted(chain, authType);
+    }
+    catch (Exception e) {
+      if (e instanceof CertificateNotMemorizedException ||
+        e instanceof MemorizationMismatchException) {
+        throw (CertificateException)e;
+      }
+      else {
+        throw new CertificateException("Exception setting up memoization", e);
+      }
+    }
 
     return(Arrays.asList(chain));
   }
@@ -129,7 +125,7 @@ public class MemorizingTrustManager implements X509Extensions {
    * {@inheritDoc}
    */
   @Override
-  synchronized public boolean isUserAddedCertificate(X509Certificate cert) {
+  public boolean isUserAddedCertificate(X509Certificate cert) {
     return(false);
   }
 
@@ -137,182 +133,342 @@ public class MemorizingTrustManager implements X509Extensions {
    * If you catch an SSLHandshakeException when performing
    * HTTPS I/O, and its getCause() is a
    * CertificateNotMemorizedException, then you know that
-   * you configured certificate memorization using
-   * memorize(), and the SSL certificate for your request
-   * was not recognized.
+   * you configured certificate memorization and the SSL
+   * certificate for your request was not recognized.
    *
    * If the user agrees that your app should use the SSL
    * certificate forever (or until you clear it), call
-   * this method, supplying the certificate chain you get
-   * by calling getCertificateChain() on the
-   * CertificateNotMemorizedException. Note that this will
-   * perform disk I/O and therefore should be done on a
-   * background thread. But, your network I/O is already being done
-   * on a background thread, right? Right?!?
+   * this method, supplying the CertificateNotMemorizedException.
+   * Note that this will perform disk I/O and therefore
+   * should be done on a background thread.
    *
-   * @param chain
-   *          user-approved certificate chain
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   * @throws CertificateException
-   * @throws IOException
+   * @param ex  exception with details of the certificate to be memorized
+   * @throws Exception if there is a problem in memorizing the certificate
    */
-  synchronized public void memorizeCert(@NonNull X509Certificate[] chain)
-    throws KeyStoreException, NoSuchAlgorithmException,
-    CertificateException, IOException {
-    for (X509Certificate cert : chain) {
-      String alias=cert.getSubjectDN().getName();
-
-      keyStore.setCertificateEntry(alias, cert);
-    }
-
-    initTrustManager();
-
-    FileOutputStream fos=new FileOutputStream(options.store);
-
-    keyStore.store(fos, options.storePassword.toCharArray());
-    fos.flush();
-    fos.close();
+  public void memorize(@NonNull MemorizationException ex)
+    throws Exception {
+    getStoreForHost(ex.host).memorize(ex.chain);
   }
 
   /**
    * If you catch an SSLHandshakeException when performing
    * HTTPS I/O, and its getCause() is a
    * CertificateNotMemorizedException, then you know that
-   * you configured certificate memorization using
-   * memorize(), and the SSL certificate for your request
-   * was not recognized.
+   * you configured certificate memorization and the SSL
+   * certificate for your request was not recognized.
    *
    * If the user agrees that your app should use the SSL
    * certificate for the lifetime of this process only, but
    * not retain it beyond that, call this method,
-   * supplying the certificate chain you get by calling
-   * getCertificateChain() on the
-   * CertificateNotMemorizedException. Once your process is
-   * terminated, this cached certificate is lost, and you
-   * will get a CertificateNotMemorizedException again later
-   * on.
+   * supplying the CertificateNotMemorizedException. Once
+   * your process is terminated, this cached certificate is
+   * lost, and you will get a CertificateNotMemorizedException
+   * again later on. Also, this class only caches a certain
+   * number of domains' worth of certificates, so if you are
+   * hitting a wide range of sites, the certificate may be lost.
    *
-   * @param chain
-   *          user-approved certificate chain
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
+   * @param ex  exception with details of the certificate to be memoized
    */
-  synchronized public void allowCertForProcess(@NonNull X509Certificate[] chain)
-    throws KeyStoreException, NoSuchAlgorithmException {
-    for (X509Certificate cert : chain) {
-      String alias=cert.getSubjectDN().getName();
-
-      transientKeyStore.setCertificateEntry(alias, cert);
-    }
-
-    initTrustManager();
+  synchronized public void memorizeForNow(@NonNull MemorizationException ex)
+    throws Exception {
+    getStoreForHost(ex.host).memorizeForNow(ex.chain);
   }
 
   /**
-   * Clears the transient key store used by allowCertForProcess(),
-   * and optionally clears the persistent key store (by deleting
-   * its file and re-initializing it).
-   * 
+   * Clears the transient key store used by memorizeForNow(),
+   * and optionally clears the persistent key store used by
+   * memorize().
+   *
+   * Note that some caching HTTP clients (e.g., OkHttp) may
+   * have live SSLSession objects that they reuse. In that
+   * case, the effects of this method will not be seen until
+   * those SSLSession objects are purged (e.g., you create
+   * a fresh OkHttpClient).
+   *
+   * @param host  host whose stores should be cleared
    * @param clearPersistent
    *          true to clear both key stores, false to clear
    *          only the transient one
-   * @throws KeyStoreException
-   * @throws NoSuchAlgorithmException
-   * @throws CertificateException
-   * @throws IOException
    */
-  synchronized public void clear(boolean clearPersistent)
-    throws KeyStoreException, NoSuchAlgorithmException,
-    CertificateException, IOException {
-    if (clearPersistent) {
-      options.store.delete();
-    }
-
-    initTransientStore();
-    initPersistentStore();
-    initTrustManager();
-  }
-
-  private void initTransientStore() throws KeyStoreException,
-    NoSuchAlgorithmException, CertificateException, IOException {
-    transientKeyStore=KeyStore.getInstance(options.storeType);
-    transientKeyStore.load(null, null);
-  }
-
-  private void initPersistentStore() throws KeyStoreException,
-    NoSuchAlgorithmException, CertificateException, IOException {
-    keyStore=KeyStore.getInstance(options.storeType);
-
-    if (options.store.exists()) {
-      keyStore.load(new FileInputStream(options.store),
-                    options.storePassword.toCharArray());
-    }
-    else {
-      keyStore.load(null, options.storePassword.toCharArray());
-    }
-  }
-
-  private void initTrustManager() throws KeyStoreException,
-    NoSuchAlgorithmException {
-    TrustManagerFactory tmf=TrustManagerFactory.getInstance("X509");
-
-    tmf.init(keyStore);
-
-    for (TrustManager t : tmf.getTrustManagers()) {
-      if (t instanceof X509TrustManager) {
-        storeTrustManager=(X509TrustManager)t;
-        break;
-      }
-    }
-
-    tmf=TrustManagerFactory.getInstance("X509");
-
-    tmf.init(transientKeyStore);
-
-    for (TrustManager t : tmf.getTrustManagers()) {
-      if (t instanceof X509TrustManager) {
-        transientTrustManager=(X509TrustManager)t;
-        break;
-      }
-    }
+  public void clear(String host, boolean clearPersistent)
+    throws Exception {
+    getStoreForHost(host).clear(clearPersistent);
   }
 
   /**
-   * Configuration options for certificate memorization.
-   * This class has a builder-style API, so you can
-   * configure an instance via a chained set of method
-   * calls.
+   * Clears details for all domains.
+   *
+   * Note that some caching HTTP clients (e.g., OkHttp) may
+   * have live SSLSession objects that they reuse. In that
+   * case, the effects of this method will not be seen until
+   * those SSLSession objects are purged (e.g., you create
+   * a fresh OkHttpClient).
+   *
+   * @param clearPersistent true to clear both memorize() and
+   *                        memorizeForNow() data; false to just
+   *                        clear memorizeForNow()
+   * @throws Exception
    */
-  public static class Options {
+  synchronized public void clearAll(boolean clearPersistent) throws Exception {
+    for (String host : stores.snapshot().keySet()) {
+      clear(host, clearPersistent);
+    }
+  }
+
+  private MemorizingStore getStoreForHost(String host) throws Exception {
+    MemorizingStore store;
+
+    synchronized(this) {
+      store=stores.get(host);
+
+      if (store==null) {
+        store=new MemorizingStore(host, workingDir, storePassword, storeType,
+          noTOFU);
+        stores.put(host, store);
+      }
+    }
+
+    return(store);
+  }
+
+  /**
+   * Builder-style API for creating instances of MemorizingTrustManager.
+   * Create an instance of this class, call either version of saveTo()
+   * (and optionally other configuration methods), then call build()
+   * to get a MemorizingTrustManager.
+   */
+  public static class Builder {
     private File workingDir=null;
-    private File store=null;
-    private String storePassword;
-    private String storeType=KeyStore.getDefaultType();
+    private char[] storePassword;
+    private String storeType;
+    private boolean noTOFU=false;
+    private int cacheSize=128;
 
     /**
-     * Constructor. Note that the Context is not held by the
-     * Options instance, and so any handy Context should be
-     * fine.
-     * 
-     * @param ctxt
-     *          a Context
-     * @param storeRelPath
-     *          a relative path within internal storage to a
-     *          working directory for the
-     *          MemorizingTrustManager (parent directories
-     *          will be created for you as needed)
-     * @param storePassword
-     *          the password under which to store these
-     *          certificates
+     * Indicates where the keystores associated with memorize() should
+     * go. This should be an empty directory that you are not using for
+     * any other purpose. Also, please put it on internal storage
+     * (e.g., subdirectory off of getFilesDir() or getCacheDir()), for
+     * security.
+     *
+     * @param workingDir where we should store memorized certificates
+     * @param storePassword passphrase to use for the keystore files
+     * @return the builder, for further configuration
      */
-    public Options(Context ctxt, String storeRelPath,
-                   String storePassword) {
-      workingDir=new File(ctxt.getFilesDir(), storeRelPath);
-      workingDir.mkdirs();
-      store=new File(workingDir, "memorized.bks");
+    public Builder saveTo(File workingDir, char[] storePassword) {
+      return(saveTo(workingDir, storePassword, KeyStore.getDefaultType()));
+    }
 
+    /**
+     * Indicates where the keystores associated with memorize() should
+     * go. This should be an empty directory that you are not using for
+     * any other purpose. Also, please put it on internal storage
+     * (e.g., subdirectory off of getFilesDir() or getCacheDir()), for
+     * security.
+     *
+     * @param workingDir where we should store memorized certificates
+     * @param storePassword passphrase to use for the keystore files
+     * @param storeType specific type of keystore file to use
+     * @return the builder, for further configuration
+     */
+    public Builder saveTo(File workingDir, char[] storePassword,
+                          String storeType) {
+      this.workingDir=workingDir;
       this.storePassword=storePassword;
+      this.storeType=storeType;
+
+      return(this);
+    }
+
+    /**
+     * By default, trust on first use (TOFU) is enabled, and so all unrecognized
+     * certificates are memorized automatically.
+     *
+     * If you call noTOFU(), and we encounter a certificate for a domain for
+     * which we have no other certificates, you will get a
+     * CertificateNotMemorizedException via a wrapper SSLHandshakeException.
+     *
+     * @return the builder, for further configuration
+     */
+    public Builder noTOFU() {
+      this.noTOFU=true;
+
+      return(this);
+    }
+
+    /**
+     * Indicates the number of domains for which to cache certificates in
+     * memory. Domains ejected from the cache will lose any transient
+     * certificates (memorizeForNow()) but will retain and persistent
+     * certificates (memorize()). Value must be greater than zero (duh).
+     *
+     * @param cacheSize number of domains to keep in cache (default: 128)
+     * @return the builder, for further configuration
+     */
+    public Builder cacheSize(int cacheSize) {
+      if (cacheSize<=0) {
+        throw new IllegalArgumentException("Please provide a sensible cache size");
+      }
+
+      this.cacheSize=cacheSize;
+
+      return(this);
+    }
+
+    /**
+     * Validates your configuration and builds the MemorizingTrustManager.
+     *
+     * This creates a new instance each time, so it is safe to hold onto
+     * this Builder and create more than one MemorizingTrustManager. However,
+     * do not use more than one MemorizingTrustManager at a time, as
+     * multiple instances do not coordinate with one another, and so each
+     * instance will be oblivious to memorizations (or clear() calls) made
+     * on other instances.
+     *
+     * @return the MemorizingTrustManager, built to your exacting specifications
+     */
+    public MemorizingTrustManager build() {
+      if (workingDir==null) {
+        throw new IllegalStateException("You have not configured this builder!");
+      }
+
+      workingDir.mkdirs();
+
+      return(new MemorizingTrustManager(workingDir, storePassword, storeType,
+        noTOFU, cacheSize));
+    }
+  }
+
+  private static class MemorizingStore {
+    private final String host;
+    private final File store;
+    private final char[] storePassword;
+    private final String storeType;
+    private final boolean noTOFU;
+    private KeyStore keyStore;
+    private X509TrustManager storeTrustManager;
+    private KeyStore transientKeyStore;
+    private X509TrustManager transientTrustManager;
+
+    MemorizingStore(String host, File workingDir, char[] storePassword,
+                    String storeType, boolean noTOFU) throws Exception {
+      this.host=host;
+      store=new File(workingDir, host);
+      this.storePassword=storePassword;
+      this.storeType=storeType;
+      this.noTOFU=noTOFU;
+
+      init();
+    }
+
+    synchronized void checkServerTrusted(@NonNull X509Certificate[] chain,
+                                                String authType)
+      throws CertificateException {
+      try {
+        storeTrustManager.checkServerTrusted(chain, authType);
+      }
+      catch (CertificateException e) {
+        try {
+          transientTrustManager.checkServerTrusted(chain, authType);
+        }
+        catch (CertificateException e2) {
+          try {
+            if (keyStore.size()==0 && transientKeyStore.size()==0) {
+              if (!noTOFU) {
+                try {
+                  memorize(chain);
+                  return;
+                }
+                catch (Exception e4) {
+                  throw new CertificateException("Problem while memorizing", e4);
+                }
+              }
+
+              throw new CertificateNotMemorizedException(chain, host);
+            }
+          }
+          catch (KeyStoreException kse) {
+            // srsly?
+          }
+
+          throw new MemorizationMismatchException(chain, host, e2);
+        }
+      }
+    }
+
+    synchronized void memorize(@NonNull X509Certificate[] chain)
+      throws Exception {
+      for (X509Certificate cert : chain) {
+        String alias=cert.getSubjectDN().getName();
+
+        keyStore.setCertificateEntry(alias, cert);
+      }
+
+      TrustManagerFactory tmf=TrustManagerFactory.getInstance("X509");
+
+      tmf.init(keyStore);
+      storeTrustManager=findX509TrustManager(tmf);
+
+      FileOutputStream fos=new FileOutputStream(store);
+
+      keyStore.store(fos, storePassword);
+      fos.flush();
+      fos.close();
+    }
+
+    synchronized void memorizeForNow(@NonNull X509Certificate[] chain)
+      throws Exception {
+      for (X509Certificate cert : chain) {
+        String alias=cert.getSubjectDN().getName();
+
+        transientKeyStore.setCertificateEntry(alias, cert);
+      }
+
+      TrustManagerFactory tmf=TrustManagerFactory.getInstance("X509");
+
+      tmf.init(transientKeyStore);
+      transientTrustManager=findX509TrustManager(tmf);
+    }
+
+    synchronized void clear(boolean clearPersistent) throws Exception {
+      if (clearPersistent) {
+        store.delete();
+      }
+
+      init();
+    }
+
+    private void init() throws Exception {
+      transientKeyStore=KeyStore.getInstance(storeType);
+      transientKeyStore.load(null, null);
+
+      TrustManagerFactory tmf=TrustManagerFactory.getInstance("X509");
+
+      tmf.init(transientKeyStore);
+      transientTrustManager=findX509TrustManager(tmf);
+
+      keyStore=KeyStore.getInstance(storeType);
+
+      if (store.exists()) {
+        keyStore.load(new FileInputStream(store), storePassword);
+      }
+      else {
+        keyStore.load(null, storePassword);
+      }
+
+      tmf=TrustManagerFactory.getInstance("X509");
+      tmf.init(keyStore);
+      storeTrustManager=findX509TrustManager(tmf);
+    }
+
+    private X509TrustManager findX509TrustManager(TrustManagerFactory tmf) {
+      for (TrustManager t : tmf.getTrustManagers()) {
+        if (t instanceof X509TrustManager) {
+          return (X509TrustManager)t;
+        }
+      }
+
+      return(null);
     }
   }
 }

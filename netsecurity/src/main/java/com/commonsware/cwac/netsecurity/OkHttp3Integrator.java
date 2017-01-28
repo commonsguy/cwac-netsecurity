@@ -1,5 +1,5 @@
 /***
- Copyright (c) 2016 CommonsWare, LLC
+ Copyright (c) 2016-2017 CommonsWare, LLC
  Licensed under the Apache License, Version 2.0 (the "License"); you may not
  use this file except in compliance with the License. You may obtain a copy
  of the License at http://www.apache.org/licenses/LICENSE-2.0. Unless required
@@ -60,9 +60,11 @@ public class OkHttp3Integrator {
         throw new CleartextAttemptException("Cleartext blocked for "+request.url());
       }
 
-      trustManager.setHost(host);
+      synchronized(this) {
+        trustManager.setHost(host);
 
-      return(chain.proceed(request));
+        return(chain.proceed(request));
+      }
     }
   }
 

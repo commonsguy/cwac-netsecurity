@@ -14,8 +14,7 @@ package com.commonsware.cwac.netsecurity.test.priv.okhttp3;
 import com.commonsware.cwac.netsecurity.test.AbstractOkHttp3Test;
 import com.commonsware.cwac.netsecurity.test.BuildConfig;
 
-abstract public class AbstractPrivateTest extends
-  AbstractOkHttp3Test {
+abstract public class AbstractPrivateTest extends AbstractOkHttp3Test {
   @Override
   protected String getUrl() {
     return(BuildConfig.TEST_PRIVATE_HTTPS_URL);
