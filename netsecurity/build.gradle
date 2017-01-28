@@ -2,14 +2,14 @@ apply plugin: 'com.android.library'
 
 dependencies {
     androidTestCompile 'com.android.support.test:rules:0.5'
-    compile 'com.android.support:support-annotations:25.0.1'
+    compile 'com.android.support:support-annotations:25.1.0'
     provided 'com.squareup.okhttp3:okhttp:3.5.0'
     androidTestCompile 'com.squareup.okhttp3:okhttp:3.5.0'
 }
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 17
