@@ -32,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:netsecurity:0.3.1'
+    compile 'com.commonsware.cwac:netsecurity:0.4.0'
     compile 'com.squareup.okhttp3:okhttp:3.5.0'
 }
 ```
@@ -172,7 +172,7 @@ module with the CRT file that matches your self-signed certificate that
 ## Dependencies
 
 `netsecurity` has a `provided` dependency on OkHttp3. This library
-should fairly closely track the latest OkHttp3 release. Version 0.3.x
+should fairly closely track the latest OkHttp3 release. Version 0.4.x
 of this library uses OkHttp version
 **3.5.0**. If you find
 that the library has fallen behind, please
@@ -185,7 +185,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.3.1**.
+The current version is **0.4.0**.
 
 ## Demo
 
@@ -234,6 +234,7 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.4.0         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|added certificate memorization and NetCipher integration options|
 |v0.3.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|bug fix per [issue #7](https://github.com/commonsguy/cwac-netsecurity/issues/7)|
 |v0.3.0         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|`user` validation per [issue #5](https://github.com/commonsguy/cwac-netsecurity/issues/5)|
 |v0.2.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|bug fix per [issue #3](https://github.com/commonsguy/cwac-netsecurity/issues/3)|
