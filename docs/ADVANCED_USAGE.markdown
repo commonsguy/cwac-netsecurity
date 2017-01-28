@@ -25,6 +25,228 @@ for the same APK
 For example, the test suites use `withConfig()`, as otherwise we would
 need dozens of separate manifests.
 
+## Certificate Memorization
+
+Certificate memorization can be thought of as "on-the-fly certificate pinning".
+Basically, as we encounter certificates in the wild, we can elect to say
+"yes, that certificate is fine, we will keep accepting it", even if it otherwise
+conflicts with whatever network security configuration that we have set up.
+
+This involves a `MemorizingTrustManager`, which is an `X509TrustManager`
+that happens to handle certificate memorization.
+
+### Creating a MemorizingTrustManager
+
+`MemorizingTrustManager` follows a typical builder pattern:
+
+- Create an instance of `MemorizingTrustManager.Builder`
+- Call methods on that builder to configure what you want
+- Call `build()` on the `Builder` to get a `MemorizingTrustManager`
+
+#### saveTo()
+
+The one `Builder` method that is required is `saveTo()`. This indicates where
+and how the memorized certificate information should be stored. There are
+two variants of this method, taking two and three parameters, respectively.
+
+The first parameter for both variants is a `File` object. This needs to point
+to a place where `MemorizingTrustManager` can save its certificate information,
+in the form of keystore files. This `File` should point to a unique spot
+on internal storage, separate from any other location that you might be using.
+So, use `getCacheDir()` or `getFilesDir()` on `Context` to get a base directory,
+then create some `File` off of it (e.g., `new File(getCacheDir(), "foo")`).
+This file should not already exist; `MemorizingTrustManager.Builder` will
+create a directory at this location.
+
+The second parameter is a `char[]` representing the passphrase to use for
+encrypting the keystores. This value is held in memory for as long as the
+`MemorizingTrustManager` is in use, so as certificates get memorized, we can
+save them to disk. There are a variety of possibilities here:
+
+- Use a hard-coded value, if your threat vectors do not involve people rooting
+a device and making note of what certificates the user has memorized
+ 
+- Use a value uniquely derived from a user-supplied passphrase (e.g., cryptographically
+secure hash with a unique salt)
+
+- Use a value stored in a hardware-backed `KeyStore` or encrypted via a key in
+such a `KeyStore`
+
+The three-parameter `saveTo()` also takes the keystore file type. In the
+two-parameter version of `saveTo()`, this defaults to `KeyStore.getDefaultType()`.
+However, the range of supported types has varied over the years
+(see [the `KeyStore` JavaDocs](https://developer.android.com/reference/java/security/KeyStore.html)).
+Hence, you might want to specifically state what keystore type that you want,
+based on your supported API levels.
+
+#### Other Configuration Methods
+
+These configuration methods are optional:
+
+- `noTOFU()` is to disable automatic trust-on-first-use behavior, described
+below
+
+- `cacheSize()` indicates how many domains' worth of memorized certificates
+should be held in cache (default: 128)
+
+### Adding the MemorizingTrustManager
+
+`MemorizingTrustManager` is an `X509TrustManager` that also implements
+the `X509TrustManagerExtensions` methods. In principle, it could be used
+directly by anything needing a `TrustManager`.
+
+In practice, it is designed to be used by the `CompositeTrustManager`
+that you get from a `TrustManagerBuilder`, as is described in
+[the main project `README](../README.markdown). There are three likely
+patterns here:
+
+- Configure the `TrustManagerBuilder` with just the `MemorizingTrustManager`.
+
+- Configure the `TrustManagerBuilder` to use the `MemorizingTrustManager`
+*or* some other network security configuration. For example, "we will support
+this network security configuration; anything failing that will be checked
+against memorized certificates". To do that, use `or()`:
+
+```java
+MemorizingTrustManager memo=new MemorizingTrustManager.Builder()
+  .saveTo(memoDir, "sekrit".toCharArray())
+  .build();
+
+TrustManagerBuilder tmb=new TrustManagerBuilder()
+  .withConfig(ctxt, R.xml.something, BuildConfig.DEBUG)
+  .or()
+  .add(memo);
+```
+
+(where `R.xml.something` is your network security configuration XML,
+`memoDir` is a place to write memorized certificates, and `ctxt` is a `Context`)
+
+- Configure the `TrustManagerBuilder` to use the `MemorizingTrustManager`
+*and* some other network security configuration. In this case, the certificate
+must pass both tests: match the network security configuration *and* be memorized.
+To do this, use `and()` in place of `or()` in the preceding example.
+
+### What Happens Now
+
+If the `MemorizingTrustManager` is asked to check a certificate chain for
+some host, and that certificate chain has been memorized, no exceptions
+will be raised.
+
+By default, `MemorizingTrustManager` works in trust-on-first-use (TOFU) mode.
+The first time that we encounter a new domain, we assume that whatever certificates
+that we receive are good, and we memorize them.
+
+When a validation failure occurs, your HTTP API will throw an `SSLHandshakeException`
+from whatever method actually does the HTTP I/O (e.g., `execute()` in OkHttp3).
+You need to look at the wrapped exception, obtained by calling `getCause()`
+on the `SSLHandshakeException`. There are two main possibilities here:
+
+1. The wrapped exception is a `CertificateNotMemorizedException`. This means
+that we have no certificates memorized for the host identified in the URL that
+you attempted to access. This will only occur if you disabled TOFU by calling
+ `noTOFU()` on the `MemorizingTrustManager.Builder`.
+
+2. The wrapped exception is a `MemorizationMismatchException`. This means that
+we *do* have certificates memorized for this host, but they do not match the
+certificates that we just got from the server.
+
+Both of these inherit from a base `MemorizationException` class.
+
+If your `SSLHandshakeException` has anything else as its cause, either there
+was a serious malfunction in the `MemorizingTrustManager` (e.g., cannot access
+files in the directory supplied to `saveTo()`), or there was some other
+problem.
+
+### Memorizing a Certificate: Manually
+
+If you get a `MemorizationException` (either `CertificateNotMemorizedException` or
+`MemorizationMismatchException`), and you want to have the `MemorizingTrustManager`
+memorize that certificate chain for use in future requests, you have two methods
+that you can call on the manager:
+
+- `memorize()` memorizes the certificate chain, saving the data in a keystore
+file in the designated directory.
+
+- `memorizeForNow()` memorizes the certificate chain, but only in memory. This
+might be used for temporary situations (e.g., the user wishes to proceed for
+now but wants to talk to the IT department to determine if the server did indeed
+change certificates). The "for now" will be until the process terminates or
+until this domain's memorized certificates fall out of the cache maintained
+by `MemorizingTrustManager`.
+
+So, for memorization, you can either have it happen automatically
+or "manually" (using `noTOFU()` and `memorize()`). Mostly, it boils down to
+whether you want to have any form of user decision as to whether to memorize
+the certificate when first encountered. If the user should make the call, use
+`noTOFU()` and `memorize()`. If you do not want to bother the user (and assume 
+that the first use is actually giving valid certificates), use the defaults.
+
+Note that not all HTTP APIs are well-suited for manual mode. For example,
+with Picasso, while we can find out about exceptions (via `listener()` on
+the `Picasso.Builder`), we are not given enough information to automatically
+retry the request after calling `memorize()`.
+
+### Clearing Memorization
+
+`MemorizingTrustManager` has two methods to let you clear out memorized certificates:
+
+- `clear()`, which takes the name of the host whose certificates should be cleared
+- `clearAll()`, to clear all certificates
+
+Both methods also take a `boolean`: `true` if you want persistent certificates
+to be cleared, `false` if you only want to clear `memorizeForNow()` certificates
+
+If your HTTP client API caches `SSLSession` objects (such as OkHttp3), then
+`clear()`/`clearAll()` will only take effect when those sessions expire. Until
+then, the trust managers are no longer consulted.
+
+### Rules for Memorization
+
+Use the same `MemorizingTrustManager` instance consistently. Having two
+or more instances can get you into trouble, as they do not coordinate with
+each other. So, a certificate memorized in one will not be known by another
+instance that was outstanding at the time.
+
+The test suite for this library does use multiple `MemorizingTrustManager`
+instances, mostly to confirm that certificates do get loaded from disk.
+
+## Integration with NetCipher
+
+[NetCipher](https://github.com/guardianproject/NetCipher) is a library to
+simplify integration between an app and Orbot, which is a Tor client.
+
+The `com.commonsware.cwac:netsecurity-netcipher` artifact provides a
+`StrongOkHttpClientBuilderEx` that blends NetCipher and `TrustManagerBuilder`,
+so you can apply network security configuration (including certificate
+memorization/TOFU) and NetCipher.
+
+The NetCipher documentation explains
+[how to use the `StrongBuilder` family of classes](https://github.com/guardianproject/NetCipher#the-strong-builders).
+`StrongOkHttpClientBuilderEx` follows the same basic pattern, though your
+best way to set one up is to call the static `newInstance()` method, supplying
+a `Context` along with your configured `TrustManagerBuilder`:
+
+```java
+StrongOkHttpClientBuilderEx
+    .newInstance(getActivity(), tmb)
+    .build(this);
+```          
+
+(where `tmb` is the `TrustManagerBuilder`)
+
+When your `StrongBuilder.Callback<OkHttpClient>` callback is called with
+`onConnected()`, the `OkHttpClient` that you receive will be configured
+both for Orbot and for the configuration you set up for your `TrustManagerBuilder`.
+
+However:
+
+- The NetCipher SSL configuration is not used. Set up all your SSL rules
+via the `TrustManagerBuilder` and the associated network security configuration
+XML files.
+
+- `withTorValidation()` on the `StrongOkHttpClientBuilderEx` is not supported
+right now, while some bugs get ironed out.
+
 ## Using the Backport Directly
 
 You do not have to use `TrustManagerBuilder` to use the network security

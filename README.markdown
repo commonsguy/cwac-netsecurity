@@ -14,10 +14,9 @@ configuration backport, particularly for
 [OkHttp3](https://github.com/square/okhttp)
 and `HttpURLConnection`.
 
-**NOTE**: If Google releases their own backport of network security
-configuration, please consider using it. Official backports are usually
-stronger candidates than are unofficial ones like the one contained
-in this library.
+This library also includes support for certificate memorization, where you
+can elect to trust certificates discovered "in the wild", either automatically
+or with user approval.
 
 ## Installation
 
@@ -124,7 +123,8 @@ supported
 
 ## Advanced Usage
 
-If you want to do more sophisticated things with the network security
+If you want to employ certificate memorization or otherwise
+do more sophisticated things with the network security
 configuration backport and/or `TrustManagerBuilder`, there is a
 [separate page of documentation](https://github.com/commonsguy/cwac-netsecurity/blob/master/docs/ADVANCED_USAGE.markdown)
 for that.
@@ -172,7 +172,7 @@ module with the CRT file that matches your self-signed certificate that
 ## Dependencies
 
 `netsecurity` has a `provided` dependency on OkHttp3. This library
-should fairly closely track the latest OkHttp3 release. Version 0.3.0
+should fairly closely track the latest OkHttp3 release. Version 0.3.x
 of this library uses OkHttp version
 **3.5.0**. If you find
 that the library has fallen behind, please
@@ -196,6 +196,9 @@ in a `ListView`. Retrofit and Picasso use a common OkHttp3-defined
 ensure that connections to key hosts, such as the Stack Exchange
 Web service API, use SSL certificates from the expected certificate
 authorities.
+
+More details on how to use this "playground" app can be found
+[in the playground documentation](https://github.com/commonsguy/cwac-netsecurity/blob/master/docs/PLAYGROUND.markdown).
 
 ## License
 
