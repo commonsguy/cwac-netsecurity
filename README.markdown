@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
     compile 'com.commonsware.cwac:netsecurity:0.4.0'
-    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
 }
 ```
 
@@ -174,7 +174,7 @@ module with the CRT file that matches your self-signed certificate that
 `netsecurity` has a `provided` dependency on OkHttp3. This library
 should fairly closely track the latest OkHttp3 release. Version 0.4.x
 of this library uses OkHttp version
-**3.5.0**. If you find
+**3.6.0**. If you find
 that the library has fallen behind, please
 [file an issue](https://github.com/commonsguy/cwac-netsecurity/issues)
 if one has not already been filed.

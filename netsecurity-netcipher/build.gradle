@@ -29,7 +29,7 @@ dependencies {
   releaseCompile 'com.commonsware.cwac:netsecurity:0.4.0'
   compile 'info.guardianproject.netcipher:netcipher:2.0.0-alpha1'
   compile 'info.guardianproject.netcipher:netcipher-okhttp3:2.0.0-alpha1'
-  compile 'com.squareup.okhttp3:okhttp:3.5.0'
+  compile 'com.squareup.okhttp3:okhttp:3.6.0'
 }
 
 if (project.hasProperty('PUBLISH_GROUP_ID')) {
@@ -44,7 +44,6 @@ if (project.hasProperty('PUBLISH_GROUP_ID')) {
     task.dependsOn variant.javaCompile
     task.from variant.javaCompile.destinationDir
     task.baseName = "cwac-netsecurity-netcipher"
-    task.classifier = 'sources'
     task.version = PUBLISH_VERSION
     task.exclude('com/commonsware/cwac/**/BuildConfig.**')
   }
