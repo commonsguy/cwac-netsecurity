@@ -84,10 +84,15 @@ based on your supported API levels.
 These configuration methods are optional:
 
 - `noTOFU()` is to disable automatic trust-on-first-use behavior, described
-below
+below.
 
 - `cacheSize()` indicates how many domains' worth of memorized certificates
-should be held in cache (default: 128)
+should be held in cache (default: 128).
+
+- `forDomains()` indicates which domains should be memorized; all other
+domains will be ignored, as if this `TrustManager` were not involved. The
+default is to memorize all domains. This method takes a `DomainMatchRule`,
+described in detail later in this page.
 
 ### Adding the MemorizingTrustManager
 
@@ -209,6 +214,45 @@ instance that was outstanding at the time.
 
 The test suite for this library does use multiple `MemorizingTrustManager`
 instances, mostly to confirm that certificates do get loaded from disk.
+
+### Memorizing Certain Domains
+
+By default, `MemorizingTrustManager` applies for all domains that it sees.
+
+Alternatively, you can use `forDomains()` to limit the scope of the domains
+that `MemorizingTrustManager` worries about. `forDomains()` takes a
+`DomainMatchRule` as a parameter.
+
+The simplest ways to create a `DomainMatchRule` are the `whitelist()`
+and `blacklist()` static methods on that class. They each take one or more
+`String` parameters representing domains. Those can either be simple domains
+(e.g., `foo.com`) or with a leading wildcard (e.g., `*.foo.com`). `whitelist()`
+will apply the `MemorizingTrustManager` for the specified domains and skip
+it for anything else. `blacklist()` will skip the `MemorizingTrustManager`
+for the specified domains and apply it for anything else.
+
+`DomainMatchRule` has other static methods for more granular control:
+
+- `is(String)` takes a domain name or wildcard domain name and matches it
+but nothing else
+
+- `is(Pattern)` takes a `Pattern` (i.e., regular expression) and matches
+it but nothing else
+
+- `not(DomainMatchRule)` takes some other rule (e.g., one returned by `is()`)
+and inverts it
+
+- `anyOf(DomainMatchRule...)` and `anyOf(List<DomainMatchRule>)` apply a logical
+OR, so a domain matching any of those rules is applied
+
+- `allOf(DomainMatchRule...)` and `allOf(List<DomainMatchRule>)` apply a logical
+AND, so only domains matching all of those rules are applied
+
+For example, `whitelist()` is implemented by wrapping each supplied domain
+in `is()` and using `anyOf()` for the collection, so we accept any of those
+domains but nothing else. `blacklist()` is implemented by wrapping each supplied
+domain in `not(is())` and using `allOf()` for the collection, so we only accept
+domains that are not any of the supplied ones.
 
 ## Integration with NetCipher
 

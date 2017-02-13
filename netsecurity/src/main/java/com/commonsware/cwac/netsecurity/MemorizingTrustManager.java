@@ -58,15 +58,17 @@ public class MemorizingTrustManager implements X509Extensions {
   private final String storeType;
   private final boolean noTOFU;
   private final LruCache<String, MemorizingStore> stores;
+  private final DomainMatchRule domainMatchRule;
 
   private MemorizingTrustManager(File workingDir, char[] storePassword,
                                  String storeType, boolean noTOFU,
-                                 int cacheSize) {
+                                 int cacheSize, DomainMatchRule domainMatchRule) {
     this.workingDir=workingDir;
     this.storePassword=storePassword;
     this.storeType=storeType;
     this.noTOFU=noTOFU;
     this.stores=new LruCache<>(cacheSize);
+    this.domainMatchRule=domainMatchRule;
   }
 
   /*
@@ -105,16 +107,18 @@ public class MemorizingTrustManager implements X509Extensions {
     @NonNull X509Certificate[] chain, String authType, String host)
     throws CertificateException {
 
-    try {
-      getStoreForHost(host).checkServerTrusted(chain, authType);
-    }
-    catch (Exception e) {
-      if (e instanceof CertificateNotMemorizedException ||
-        e instanceof MemorizationMismatchException) {
-        throw (CertificateException)e;
+    if (domainMatchRule==null || domainMatchRule.matches(host)) {
+      try {
+        getStoreForHost(host).checkServerTrusted(chain, authType);
       }
-      else {
-        throw new CertificateException("Exception setting up memoization", e);
+      catch (Exception e) {
+        if (e instanceof CertificateNotMemorizedException ||
+          e instanceof MemorizationMismatchException) {
+          throw (CertificateException)e;
+        }
+        else {
+          throw new CertificateException("Exception setting up memoization", e);
+        }
       }
     }
 
@@ -243,6 +247,7 @@ public class MemorizingTrustManager implements X509Extensions {
     private String storeType;
     private boolean noTOFU=false;
     private int cacheSize=128;
+    private DomainMatchRule domainMatchRule;
 
     /**
      * Indicates where the keystores associated with memorize() should
@@ -315,6 +320,12 @@ public class MemorizingTrustManager implements X509Extensions {
       return(this);
     }
 
+    public Builder forDomains(DomainMatchRule domainMatchRule) {
+      this.domainMatchRule=domainMatchRule;
+
+      return(this);
+    }
+
     /**
      * Validates your configuration and builds the MemorizingTrustManager.
      *
@@ -335,7 +346,7 @@ public class MemorizingTrustManager implements X509Extensions {
       workingDir.mkdirs();
 
       return(new MemorizingTrustManager(workingDir, storePassword, storeType,
-        noTOFU, cacheSize));
+        noTOFU, cacheSize, domainMatchRule));
     }
   }
 

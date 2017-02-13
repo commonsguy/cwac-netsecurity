@@ -28,6 +28,7 @@ import okhttp3.CacheControl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import static com.commonsware.cwac.netsecurity.DomainMatchRule.is;
 
 @RunWith(AndroidJUnit4.class)
 public class OkHttp3MemorizationTests {
@@ -187,6 +188,23 @@ public class OkHttp3MemorizationTests {
         throw e;
       }
     }
+  }
+
+  @Test
+  public void testDomainMatchRule() throws Exception {
+    MemorizingTrustManager memo=new MemorizingTrustManager.Builder()
+      .saveTo(memoDir, "sekrit".toCharArray())
+      .noTOFU()
+      .forDomains(is("this-so-does-not-exist.com"))
+      .build();
+
+    final TrustManagerBuilder tmb=new TrustManagerBuilder().add(memo);
+
+    OkHttp3Integrator.applyTo(tmb, builder);
+    OkHttpClient client=builder.build();
+
+    Response response=client.newCall(buildRequest()).execute();
+    Assert.assertEquals(getExpectedResponse(), response.body().string());
   }
 
   @Test
