@@ -12,7 +12,7 @@ dependencies {
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     debugCompile project(':netsecurity-netcipher')
-    releaseCompile 'com.commonsware.cwac:netsecurity-netcipher:0.4.0'
+    releaseCompile 'com.commonsware.cwac:netsecurity-netcipher:0.4.1'
     compile 'com.squareup.okhttp3:okhttp:3.6.0'
 }
 
