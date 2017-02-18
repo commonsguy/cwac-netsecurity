@@ -59,16 +59,19 @@ public class MemorizingTrustManager implements X509Extensions {
   private final boolean noTOFU;
   private final LruCache<String, MemorizingStore> stores;
   private final DomainMatchRule domainMatchRule;
+  private final boolean onlySingleItemChains;
 
   private MemorizingTrustManager(File workingDir, char[] storePassword,
                                  String storeType, boolean noTOFU,
-                                 int cacheSize, DomainMatchRule domainMatchRule) {
+                                 int cacheSize, DomainMatchRule domainMatchRule,
+                                 boolean onlySingleItemChains) {
     this.workingDir=workingDir;
     this.storePassword=storePassword;
     this.storeType=storeType;
     this.noTOFU=noTOFU;
     this.stores=new LruCache<>(cacheSize);
     this.domainMatchRule=domainMatchRule;
+    this.onlySingleItemChains=onlySingleItemChains;
   }
 
   /*
@@ -107,7 +110,8 @@ public class MemorizingTrustManager implements X509Extensions {
     @NonNull X509Certificate[] chain, String authType, String host)
     throws CertificateException {
 
-    if (domainMatchRule==null || domainMatchRule.matches(host)) {
+    if ((!onlySingleItemChains || chain.length==1) &&
+      (domainMatchRule==null || domainMatchRule.matches(host))) {
       try {
         getStoreForHost(host).checkServerTrusted(chain, authType);
       }
@@ -248,6 +252,7 @@ public class MemorizingTrustManager implements X509Extensions {
     private boolean noTOFU=false;
     private int cacheSize=128;
     private DomainMatchRule domainMatchRule;
+    private boolean onlySingleItemChains=false;
 
     /**
      * Indicates where the keystores associated with memorize() should
@@ -320,8 +325,26 @@ public class MemorizingTrustManager implements X509Extensions {
       return(this);
     }
 
+    /**
+     * Limits memorization to domains that match the supplied rule
+     *
+     * @param domainMatchRule Rule for which domains to memorize
+     * @return the builder, for further configuration
+     */
     public Builder forDomains(DomainMatchRule domainMatchRule) {
       this.domainMatchRule=domainMatchRule;
+
+      return(this);
+    }
+
+    /**
+     * Limits memorization to single-item certificate chains, which should
+     * effectively limit you to self-signed certificates.
+     *
+     * @return the builder, for further configuration
+     */
+    public Builder onlySingleItemChains() {
+      this.onlySingleItemChains=true;
 
       return(this);
     }
@@ -346,7 +369,7 @@ public class MemorizingTrustManager implements X509Extensions {
       workingDir.mkdirs();
 
       return(new MemorizingTrustManager(workingDir, storePassword, storeType,
-        noTOFU, cacheSize, domainMatchRule));
+        noTOFU, cacheSize, domainMatchRule, onlySingleItemChains));
     }
   }
 

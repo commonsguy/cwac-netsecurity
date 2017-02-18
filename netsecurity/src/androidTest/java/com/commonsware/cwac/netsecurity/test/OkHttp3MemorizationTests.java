@@ -281,9 +281,74 @@ public class OkHttp3MemorizationTests {
     Assert.assertEquals(getExpectedResponse(), response.body().string());
   }
 
+  @Test
+  public void testSingleItemPublic() throws Exception {
+    MemorizingTrustManager memo=new MemorizingTrustManager.Builder()
+      .saveTo(memoDir, "sekrit".toCharArray())
+      .noTOFU()
+      .onlySingleItemChains()
+      .build();
+
+    final TrustManagerBuilder tmb=new TrustManagerBuilder()
+      .useDefault()
+      .and()
+      .add(memo);
+
+    OkHttp3Integrator.applyTo(tmb, builder);
+    OkHttpClient client=builder.build();
+
+    Response response=client.newCall(buildPublicRequest()).execute();
+    Assert.assertEquals(getExpectedResponse(), response.body().string());
+  }
+
+  @Test
+  public void testSingleItemPrivate() throws Exception {
+    MemorizingTrustManager memo=new MemorizingTrustManager.Builder()
+      .saveTo(memoDir, "sekrit".toCharArray())
+      .noTOFU()
+      .onlySingleItemChains()
+      .build();
+
+    final TrustManagerBuilder tmb=new TrustManagerBuilder()
+      .withConfig(InstrumentationRegistry.getContext(),
+        R.xml.okhttp3_selfsigned_debug, true)
+      .and()
+      .add(memo);
+
+    OkHttp3Integrator.applyTo(tmb, builder);
+    OkHttpClient client=builder.build();
+    CertificateNotMemorizedException memoEx;
+
+    try {
+      client.newCall(buildRequest()).execute();
+
+      throw new AssertionFailedError("Expected SSLHandshakeException, did not get!");
+    }
+    catch (SSLHandshakeException e) {
+      if (e.getCause() instanceof CertificateNotMemorizedException) {
+        memoEx=(CertificateNotMemorizedException)e.getCause();
+      }
+      else {
+        throw new AssertionFailedError("Expected CertificateNotMemorizedException, did not get!");
+      }
+    }
+
+    memo.memorize(memoEx);
+
+    Response response=client.newCall(buildRequest()).execute();
+    Assert.assertEquals(getExpectedResponse(), response.body().string());
+  }
+
   private Request buildRequest() {
     return(new Request.Builder()
       .url(getUrl())
+      .cacheControl(CacheControl.FORCE_NETWORK)
+      .build());
+  }
+
+  private Request buildPublicRequest() {
+    return(new Request.Builder()
+      .url("https://wares.commonsware.com/test.json")
       .cacheControl(CacheControl.FORCE_NETWORK)
       .build());
   }

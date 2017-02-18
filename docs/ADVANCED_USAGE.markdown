@@ -94,6 +94,12 @@ domains will be ignored, as if this `TrustManager` were not involved. The
 default is to memorize all domains. This method takes a `DomainMatchRule`,
 described in detail later in this page.
 
+- `onlySingleItemChains()` indicates that we should only memorize certificate
+chains with a single item. This should effectively limit memorization to
+self-signed certificates (as any CA-backed certificate should have a longer
+chain). By default, this is disabled, and so memorization is applied regardless
+of chain length.
+
 ### Adding the MemorizingTrustManager
 
 `MemorizingTrustManager` is an `X509TrustManager` that also implements
