@@ -32,8 +32,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:netsecurity:0.4.2'
-    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+    compile 'com.commonsware.cwac:netsecurity:0.4.3'
+    compile 'com.squareup.okhttp3:okhttp:3.8.0'
 }
 ```
 
@@ -174,7 +174,7 @@ module with the CRT file that matches your self-signed certificate that
 `netsecurity` has a `provided` dependency on OkHttp3. This library
 should fairly closely track the latest OkHttp3 release. Version 0.4.x
 of this library uses OkHttp version
-**3.6.0**. If you find
+**3.8.0**. If you find
 that the library has fallen behind, please
 [file an issue](https://github.com/commonsguy/cwac-netsecurity/issues)
 if one has not already been filed.
@@ -185,7 +185,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.4.2**.
+The current version is **0.4.3**.
 
 ## Demo
 
@@ -234,7 +234,8 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
-|v0.4.2         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|add single-item-chain filtering for memorization|
+|v0.4.3         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.8.0 and new test SSL certificate|
+|v0.4.2         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|added single-item-chain filtering for memorization|
 |v0.4.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|switched to OkHttp 3.6.0, add domain filtering for memorization|
 |v0.4.0         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|added certificate memorization and NetCipher integration options|
 |v0.3.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|bug fix per [issue #7](https://github.com/commonsguy/cwac-netsecurity/issues/7)|
