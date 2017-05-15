@@ -3,7 +3,7 @@
   <domain-config>
     <domain includeSubdomains="false">wares.commonsware.com</domain>
     <pin-set expiration="2014-05-01">
-      <pin digest="SHA-256">RyT1OwuqsvhmpgcGEMQ8OG0vQx/8pdIXGHnAPemF0XY=</pin>
+      <pin digest="SHA-256">sF1A3ez70l81aUjLwU6KiAMmOyPNFQDueJH+4YDWppo=</pin>
     </pin-set>
   </domain-config>
 </network-security-config>

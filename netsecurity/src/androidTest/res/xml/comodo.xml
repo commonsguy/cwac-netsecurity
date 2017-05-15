@@ -2,7 +2,7 @@
 <network-security-config>
   <base-config>
     <trust-anchors>
-      <certificates src="@raw/thawte_primary_root" />
+      <certificates src="@raw/addtrustexternalcaroot" />
     </trust-anchors>
   </base-config>
 </network-security-config>

@@ -19,7 +19,7 @@ public class SpecificAuthorityMatchTest extends SimpleHTTPSTest {
   @Override
   protected TrustManagerBuilder getBuilder() throws Exception {
     return(new TrustManagerBuilder()
-      .withConfig(InstrumentationRegistry.getContext(), R.xml.thawte, false));
+      .withConfig(InstrumentationRegistry.getContext(), R.xml.comodo, false));
   }
 
   @Override
