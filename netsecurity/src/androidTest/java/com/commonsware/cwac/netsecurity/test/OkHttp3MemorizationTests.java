@@ -290,7 +290,8 @@ public class OkHttp3MemorizationTests {
       .build();
 
     final TrustManagerBuilder tmb=new TrustManagerBuilder()
-      .useDefault()
+      .withConfig(InstrumentationRegistry.getContext(),
+        R.xml.comodo, true)
       .and()
       .add(memo);
 
