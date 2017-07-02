@@ -32,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:netsecurity:0.4.3'
+    compile 'com.commonsware.cwac:netsecurity:0.4.4'
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
 }
 ```
@@ -185,7 +185,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.4.3**.
+The current version is **0.4.4**.
 
 ## Demo
 
@@ -234,6 +234,7 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.4.4         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.8.1 and fixed testing bug|
 |v0.4.3         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.8.0 and new test SSL certificate|
 |v0.4.2         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|added single-item-chain filtering for memorization|
 |v0.4.1         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|switched to OkHttp 3.6.0, add domain filtering for memorization|

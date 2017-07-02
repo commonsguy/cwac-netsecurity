@@ -12,17 +12,17 @@ dependencies {
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     debugCompile project(':netsecurity-netcipher')
-    releaseCompile 'com.commonsware.cwac:netsecurity-netcipher:0.4.3'
-    compile 'com.squareup.okhttp3:okhttp:3.8.0'
+    releaseCompile 'com.commonsware.cwac:netsecurity-netcipher:0.4.4'
+    compile 'com.squareup.okhttp3:okhttp:3.8.1'
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
     }
 
     signingConfigs {
