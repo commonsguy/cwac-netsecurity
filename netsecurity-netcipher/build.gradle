@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion 25
-  buildToolsVersion "25.0.2"
+  buildToolsVersion "26.0.2"
 
   defaultConfig {
     minSdkVersion 17
@@ -25,11 +25,11 @@ repositories {
 }
 
 dependencies {
-  debugCompile project(':netsecurity')
-  releaseCompile 'com.commonsware.cwac:netsecurity:0.4.4'
-  compile 'info.guardianproject.netcipher:netcipher:2.0.0-alpha1'
-  compile 'info.guardianproject.netcipher:netcipher-okhttp3:2.0.0-alpha1'
-  compile 'com.squareup.okhttp3:okhttp:3.8.0'
+  debugApi project(":netsecurity")
+  releaseApi "com.commonsware.cwac:netsecurity:0.4.4"
+  api "info.guardianproject.netcipher:netcipher:2.0.0-alpha1"
+  api "info.guardianproject.netcipher:netcipher-okhttp3:2.0.0-alpha1"
+  api "com.squareup.okhttp3:okhttp:3.9.0"
 }
 
 if (project.hasProperty('PUBLISH_GROUP_ID')) {
