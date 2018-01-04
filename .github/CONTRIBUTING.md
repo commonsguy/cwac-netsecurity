@@ -28,7 +28,7 @@ provide the information requested in
 
 ## Contributing Feature Requests
 
-If you have an idea for how to make the library better, feel free to file an [issue](https://github.com/commonsguy/cwac-cam2/issues).
+If you have an idea for how to make the library better, feel free to file an [issue](https://github.com/commonsguy/cwac-netsecurity/issues).
 You will have better luck in getting the feature implemented if you can "sell" the library author
 on how this feature will help the library author.
 
