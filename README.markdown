@@ -18,6 +18,8 @@ This library also includes support for certificate memorization, where you
 can elect to trust certificates discovered "in the wild", either automatically
 or with user approval.
 
+Note that OkHttp has its own `CertificatePinner`. If all you are looking to do is pin certificates, and you are usign OkHttp (and you should be!), use `CertificatePinner` and do not use CWAC-NetSecurity. Conversely, if there are [advanced features of CWAC-NetSecurity](https://github.com/commonsguy/cwac-netsecurity/blob/master/docs/ADVANCED_USAGE.markdown) that you wish to use, that's great... but do not also use `CertificatePinner`. Use one or the other, not both.
+
 ## Installation
 
 The artifact for this library is distributed via the CWAC repository,
