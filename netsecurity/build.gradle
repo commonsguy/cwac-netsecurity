@@ -9,12 +9,11 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 26
+        targetSdkVersion 28
         testApplicationId "com.commonsware.cwac.netsecurity.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "TEST_PRIVATE_HTTP_URL", '"'+TEST_PRIVATE_HTTP_URL+'"'
