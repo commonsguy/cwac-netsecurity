@@ -18,7 +18,7 @@ import com.commonsware.cwac.netsecurity.test.AbstractHURLTest;
 public class SimpleHTTPSTest extends AbstractHURLTest {
   @Override
   protected String getUrl() {
-    return("https://wares.commonsware.com/test.json");
+    return("https://wares.commonsware.com/static/test.json");
   }
 
   @Override

@@ -349,7 +349,7 @@ public class OkHttp3MemorizationTests {
 
   private Request buildPublicRequest() {
     return(new Request.Builder()
-      .url("https://wares.commonsware.com/test.json")
+      .url("https://wares.commonsware.com/static/test.json")
       .cacheControl(CacheControl.FORCE_NETWORK)
       .build());
   }

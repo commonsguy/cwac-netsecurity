@@ -17,7 +17,7 @@ import com.commonsware.cwac.netsecurity.test.AbstractOkHttp3Test;
 abstract public class SimpleHTTPSTest extends AbstractOkHttp3Test {
   @Override
   protected String getUrl() {
-    return("https://wares.commonsware.com/test.json");
+    return("https://wares.commonsware.com/static/test.json");
   }
 
   @Override
