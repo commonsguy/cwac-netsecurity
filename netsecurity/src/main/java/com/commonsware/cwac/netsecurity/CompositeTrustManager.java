@@ -14,11 +14,18 @@
 
 package com.commonsware.cwac.netsecurity;
 
+import java.net.HttpURLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
@@ -304,6 +311,42 @@ public class CompositeTrustManager implements X509Extensions {
     }
 
     return(issuers.toArray(new X509Certificate[issuers.size()]));
+  }
+
+  /**
+   * Configures the supplied HttpURLConnection to use the trust
+   * manager configured via this builder. This will only be done
+   * if the connection really is an HttpsURLConnection (a subclass
+   * of HttpURLConnection).
+   *
+   * @param c the connection to configure
+   * @return the connection passed in, for chaining
+   * @throws NoSuchAlgorithmException
+   * @throws KeyManagementException
+   */
+  public HttpURLConnection applyTo(HttpURLConnection c)
+    throws NoSuchAlgorithmException, KeyManagementException {
+    if (c instanceof HttpsURLConnection && size()>0) {
+      SSLContext ssl=SSLContext.getInstance("TLS");
+      TrustManager[] trustManagers=buildArray();
+
+      ssl.init(null, trustManagers, null);
+      ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
+      setHost(c.getURL().getHost());
+    }
+
+    return(c);
+  }
+
+  public SSLSocketFactory getSocketFactory()
+    throws NoSuchAlgorithmException, KeyManagementException {
+    SSLContext ssl = SSLContext.getInstance("TLS");
+    ssl.init(null, new X509TrustManager[] { this }, null);
+    return ssl.getSocketFactory();
+  }
+
+  private X509TrustManager[] buildArray() {
+    return(new X509TrustManager[] { this });
   }
 
   private void passChainToListeners(X509Certificate[] chain) {

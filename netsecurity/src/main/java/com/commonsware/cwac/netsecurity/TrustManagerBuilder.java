@@ -93,14 +93,7 @@ public class TrustManagerBuilder {
    */
   public HttpURLConnection applyTo(HttpURLConnection c)
     throws NoSuchAlgorithmException, KeyManagementException {
-    if (c instanceof HttpsURLConnection && mgr.size()>0) {
-      SSLContext ssl=SSLContext.getInstance("TLS");
-      TrustManager[] trustManagers=buildArray();
-
-      ssl.init(null, trustManagers, null);
-      ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
-      mgr.setHost(c.getURL().getHost());
-    }
+    mgr.applyTo(c);
 
     return(c);
   }
