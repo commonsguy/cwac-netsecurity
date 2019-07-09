@@ -327,11 +327,7 @@ public class CompositeTrustManager implements X509Extensions {
   public HttpURLConnection applyTo(HttpURLConnection c)
     throws NoSuchAlgorithmException, KeyManagementException {
     if (c instanceof HttpsURLConnection && size()>0) {
-      SSLContext ssl=SSLContext.getInstance("TLS");
-      TrustManager[] trustManagers=buildArray();
-
-      ssl.init(null, trustManagers, null);
-      ((HttpsURLConnection)c).setSSLSocketFactory(ssl.getSocketFactory());
+      ((HttpsURLConnection)c).setSSLSocketFactory(getSocketFactory());
       setHost(c.getURL().getHost());
     }
 
