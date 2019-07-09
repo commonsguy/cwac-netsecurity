@@ -34,14 +34,14 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.commonsware.cwac:netsecurity:0.4.5'
-    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
+    implementation 'com.commonsware.cwac:netsecurity:0.5.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
 }
 ```
 
 If you are using this library with OkHttp3, you also need to have
 an `implementation` statement for a compatible OkHttp3 artifact, as shown
-above.
+above. Right now, the most recent compatible OkHttp3 version is 3.9.1.
 
 If you are using `HttpURLConnection`, or tying this code into some
 other HTTP client stack, you can skip the OkHttp3 dependency.
@@ -99,8 +99,6 @@ In either case, on Android 7.0+ devices, `withManifestConfig()` will
 *not* use the backport. Instead, the platform-native implementation
 of the network security configuration subsystem will be used. On
 Android 4.2-6.0 devices, the backport will be used.
-
-[JavaDocs for the library are available](http://javadocs.commonsware.com/cwac/netsecurity/index.html).
 
 ## Basic Limitations
 
@@ -171,15 +169,15 @@ replace the `androidTest/res/raw/selfsigned.crt` file in each library
 module with the CRT file that matches your self-signed certificate that
 `TEST_PRIVATE_HTTPS_URL` uses.
 
+Note that right now the tests require Android 8.1 or *older*; some tests will
+not work on Android 9.0 and higher.
+
 ## Dependencies
 
 `netsecurity` has a `provided` dependency on OkHttp3. This library
-should fairly closely track the latest OkHttp3 release. Version 0.4.5
+should fairly closely track the latest OkHttp3 release. Version 0.5.0
 of this library uses OkHttp version
-**3.9.0**. If you find
-that the library has fallen behind, please
-[file an issue](https://github.com/commonsguy/cwac-netsecurity/issues)
-if one has not already been filed.
+**3.9.1**.
 
 `netsecurity` depends upon the `support-annotations` from the Android SDK.
 
@@ -187,20 +185,7 @@ Otherwise, there are no external dependencies.
 
 ## Version
 
-The current version is **0.4.5**.
-
-## Demo
-
-The `demo/` module is an Android app that uses OkHttp3, Retrofit,
-and Picasso to show the latest Android questions on Stack Overflow
-in a `ListView`. Retrofit and Picasso use a common OkHttp3-defined
-`OkHttpClient` object, and that client uses `netsecurity` to
-ensure that connections to key hosts, such as the Stack Exchange
-Web service API, use SSL certificates from the expected certificate
-authorities.
-
-More details on how to use this "playground" app can be found
-[in the playground documentation](https://github.com/commonsguy/cwac-netsecurity/blob/master/docs/PLAYGROUND.markdown).
+The current version is **0.5.0**.
 
 ## License
 
@@ -236,6 +221,7 @@ Do not ask for help via social media.
 
 |Library Version|AOSP Code Base                                                                                          |Release Notes|
 |:-------------:|:------------------------------------------------------------------------------------------------------:|-------------|
+|v0.5.0         |Android 9.0 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.9.1 and newer build instructions, [added methods to `CompositeTrustManager`](https://github.com/commonsguy/cwac-netsecurity/issues/18) |
 |v0.4.5         |Android 8.0 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.9.0 and newer Android Plugin for Gradle, Gradle|
 |v0.4.4         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.8.1 and fixed testing bug|
 |v0.4.3         |Android 7.1 source code from the SDK, plus [the `android-7.1.0_r7` tagged edition of `conscrypt`](https://android.googlesource.com/platform/external/conscrypt/+/android-7.1.0_r7)|updated to OkHttp 3.8.0 and new test SSL certificate|

@@ -25,10 +25,10 @@ repositories {
 
 dependencies {
   debugApi project(":netsecurity")
-  releaseApi "com.commonsware.cwac:netsecurity:0.4.4"
+  releaseApi "com.commonsware.cwac:netsecurity:0.5.0"
   api "info.guardianproject.netcipher:netcipher:2.0.0-alpha1"
   api "info.guardianproject.netcipher:netcipher-okhttp3:2.0.0-alpha1"
-  api "com.squareup.okhttp3:okhttp:3.9.0"
+  api "com.squareup.okhttp3:okhttp:3.9.1"
 }
 
 if (project.hasProperty('PUBLISH_GROUP_ID')) {
