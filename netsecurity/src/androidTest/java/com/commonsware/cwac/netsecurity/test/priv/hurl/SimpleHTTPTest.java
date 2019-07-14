@@ -11,11 +11,19 @@
 
 package com.commonsware.cwac.netsecurity.test.priv.hurl;
 
+import android.os.Build;
 import com.commonsware.cwac.netsecurity.test.AbstractHURLTest;
 import com.commonsware.cwac.netsecurity.BuildConfig;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
+import org.junit.Before;
+import static org.junit.Assume.assumeTrue;
 
 public class SimpleHTTPTest extends AbstractHURLTest {
+  @Before
+  public void setUp() {
+    assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.P);
+  }
+
   @Override
   protected String getUrl() {
     return(BuildConfig.TEST_PRIVATE_HTTP_URL);
