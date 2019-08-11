@@ -14,7 +14,6 @@
 
 package com.commonsware.cwac.netsecurity;
 
-import android.support.annotation.NonNull;
 import android.util.LruCache;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,7 +77,7 @@ public class MemorizingTrustManager implements X509Extensions {
    * {@inheritDoc}
    */
   @Override
-  public void checkClientTrusted(@NonNull X509Certificate[] chain,
+  public void checkClientTrusted(X509Certificate[] chain,
                                               String authType)
     throws CertificateException {
     throw new UnsupportedOperationException("Client checks not supported");
@@ -88,7 +87,7 @@ public class MemorizingTrustManager implements X509Extensions {
    * {@inheritDoc}
    */
   @Override
-  public void checkServerTrusted(@NonNull X509Certificate[] chain,
+  public void checkServerTrusted(X509Certificate[] chain,
                                               String authType)
     throws CertificateException {
     throw new IllegalStateException("Must use three-parameter checkServerTrusted()");
@@ -107,7 +106,7 @@ public class MemorizingTrustManager implements X509Extensions {
    */
   @Override
   public List<X509Certificate> checkServerTrusted(
-    @NonNull X509Certificate[] chain, String authType, String host)
+    X509Certificate[] chain, String authType, String host)
     throws CertificateException {
 
     if ((!onlySingleItemChains || chain.length==1) &&
@@ -153,7 +152,7 @@ public class MemorizingTrustManager implements X509Extensions {
    * @param ex  exception with details of the certificate to be memorized
    * @throws Exception if there is a problem in memorizing the certificate
    */
-  public void memorize(@NonNull MemorizationException ex)
+  public void memorize(MemorizationException ex)
     throws Exception {
     getStoreForHost(ex.host).memorize(ex.chain);
   }
@@ -177,7 +176,7 @@ public class MemorizingTrustManager implements X509Extensions {
    *
    * @param ex  exception with details of the certificate to be memoized
    */
-  synchronized public void memorizeForNow(@NonNull MemorizationException ex)
+  synchronized public void memorizeForNow(MemorizationException ex)
     throws Exception {
     getStoreForHost(ex.host).memorizeForNow(ex.chain);
   }
@@ -395,7 +394,7 @@ public class MemorizingTrustManager implements X509Extensions {
       init();
     }
 
-    synchronized void checkServerTrusted(@NonNull X509Certificate[] chain,
+    synchronized void checkServerTrusted(X509Certificate[] chain,
                                                 String authType)
       throws CertificateException {
       try {
@@ -430,7 +429,7 @@ public class MemorizingTrustManager implements X509Extensions {
       }
     }
 
-    synchronized void memorize(@NonNull X509Certificate[] chain)
+    synchronized void memorize(X509Certificate[] chain)
       throws Exception {
       for (X509Certificate cert : chain) {
         String alias=cert.getSubjectDN().getName();
@@ -450,7 +449,7 @@ public class MemorizingTrustManager implements X509Extensions {
       fos.close();
     }
 
-    synchronized void memorizeForNow(@NonNull X509Certificate[] chain)
+    synchronized void memorizeForNow(X509Certificate[] chain)
       throws Exception {
       for (X509Certificate cert : chain) {
         String alias=cert.getSubjectDN().getName();
