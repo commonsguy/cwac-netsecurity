@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-</PreferenceScreen>
+<network-security-config>
+  <domain-config>
+    <domain includeSubdomains="false">wares.commonsware.com</domain>
+    <pin-set expiration="2020-05-20">
+      <pin digest="SHA-256">sF1A3ez70l81aUjLwU6KiAMmOyPNFQDueJH+4YDWppo=</pin>
+    </pin-set>
+  </domain-config>
+</network-security-config>
