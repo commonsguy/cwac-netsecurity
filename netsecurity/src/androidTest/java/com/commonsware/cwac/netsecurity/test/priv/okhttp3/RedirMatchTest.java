@@ -12,7 +12,7 @@
 package com.commonsware.cwac.netsecurity.test.priv.okhttp3;
 
 import android.os.Build;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 import com.commonsware.cwac.netsecurity.BuildConfig;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
 import com.commonsware.cwac.netsecurity.test.R;

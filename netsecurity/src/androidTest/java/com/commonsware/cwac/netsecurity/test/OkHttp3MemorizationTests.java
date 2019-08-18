@@ -11,8 +11,8 @@
 
 package com.commonsware.cwac.netsecurity.test;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 import com.commonsware.cwac.netsecurity.CertificateNotMemorizedException;
 import com.commonsware.cwac.netsecurity.MemorizingTrustManager;
 import com.commonsware.cwac.netsecurity.OkHttp3Integrator;

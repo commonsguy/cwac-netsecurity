@@ -11,9 +11,9 @@
 
 package com.commonsware.cwac.netsecurity.test.pub.hurl;
 
-import android.support.test.InstrumentationRegistry;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
 import com.commonsware.cwac.netsecurity.test.R;
+import androidx.test.InstrumentationRegistry;
 
 public class SpecificAuthorityMatchTest extends SimpleHTTPSTest {
   @Override

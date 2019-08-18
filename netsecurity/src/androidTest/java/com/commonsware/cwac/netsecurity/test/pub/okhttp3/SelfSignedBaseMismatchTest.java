@@ -11,7 +11,7 @@
 
 package com.commonsware.cwac.netsecurity.test.pub.okhttp3;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
 import com.commonsware.cwac.netsecurity.test.R;
 

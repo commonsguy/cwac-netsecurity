@@ -14,7 +14,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 29
         testApplicationId "com.commonsware.cwac.netsecurity.test"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "TEST_PRIVATE_HTTP_URL", '"'+TEST_PRIVATE_HTTP_URL+'"'
         buildConfigField "String", "TEST_PRIVATE_HTTP_REDIR_URL", '"'+TEST_PRIVATE_HTTP_REDIR_URL+'"'
         buildConfigField "String", "TEST_PRIVATE_HTTPS_URL", '"'+TEST_PRIVATE_HTTPS_URL+'"'

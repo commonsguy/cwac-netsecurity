@@ -11,7 +11,6 @@
 
 package com.commonsware.cwac.netsecurity.test;
 
-import android.support.test.runner.AndroidJUnit4;
 import com.commonsware.cwac.netsecurity.CertChainListener;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
 import junit.framework.Assert;
@@ -27,6 +26,7 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
+import androidx.test.runner.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 abstract public class AbstractHURLTest {

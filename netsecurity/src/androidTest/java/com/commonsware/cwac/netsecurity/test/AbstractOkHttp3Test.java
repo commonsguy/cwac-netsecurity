@@ -11,7 +11,7 @@
 
 package com.commonsware.cwac.netsecurity.test;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 import com.commonsware.cwac.netsecurity.CertChainListener;
 import com.commonsware.cwac.netsecurity.CertificateNotMemorizedException;
 import com.commonsware.cwac.netsecurity.OkHttp3Integrator;

@@ -11,7 +11,7 @@
 
 package com.commonsware.cwac.netsecurity.test.priv.hurl;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 import com.commonsware.cwac.netsecurity.TrustManagerBuilder;
 import com.commonsware.cwac.netsecurity.test.R;
 
