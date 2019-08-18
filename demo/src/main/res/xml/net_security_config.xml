@@ -3,19 +3,37 @@
   <domain-config>
     <domain includeSubdomains="false">api.stackexchange.com</domain>
     <trust-anchors>
-      <certificates src="@raw/digicert_high_assurance_ev_root_ca" />
+      <certificates src="@raw/api_stackexchange_com" />
+    </trust-anchors>
+  </domain-config>
+  <domain-config>
+    <domain includeSubdomains="true">googleusercontent.com</domain>
+    <trust-anchors>
+      <certificates src="@raw/googleusercontent_com" />
     </trust-anchors>
   </domain-config>
   <domain-config>
     <domain includeSubdomains="false">graph.facebook.com</domain>
     <trust-anchors>
-      <certificates src="@raw/digicert_high_assurance_ev_root_ca" />
+      <certificates src="@raw/graph_facebook_com" />
+    </trust-anchors>
+  </domain-config>
+  <domain-config>
+    <domain includeSubdomains="false">i.stack.imgur.com</domain>
+    <trust-anchors>
+      <certificates src="@raw/i_stack_imgur_com" />
+    </trust-anchors>
+  </domain-config>
+  <domain-config>
+    <domain includeSubdomains="false">platform-lookaside.fbsbx.com</domain>
+    <trust-anchors>
+      <certificates src="@raw/platform_lookaside_fbsbx_com" />
     </trust-anchors>
   </domain-config>
   <domain-config>
     <domain includeSubdomains="false">www.gravatar.com</domain>
     <trust-anchors>
-      <certificates src="@raw/gdroot_g2" />
+      <certificates src="@raw/www_gravatar_com" />
     </trust-anchors>
   </domain-config>
 </network-security-config>
